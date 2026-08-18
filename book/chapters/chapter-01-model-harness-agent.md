@@ -37,7 +37,7 @@ $$Agent = Model + Harness$$
 
 ## 1.2 OpenAI 的实验：100 万行代码，零人工编写
 
-2026 年 2 月 11 日，OpenAI 技术人员 Ryan Lopopolo 发表了《Harness Engineering: Harnessing Codex in an Agent-First World》（OpenAI 官方博客，2026-02-11），这可能是 Harness Engineering 作为一门学科被正式宣告成立的标志性文章。
+2026 年 2 月 11 日，OpenAI 技术人员 Ryan Lopopolo 发表了《Harness Engineering: Leveraging Codex in an Agent-First World》（OpenAI 官方博客，2026-02-11），这可能是 Harness Engineering 作为一门学科被正式宣告成立的标志性文章。
 
 文章披露了一组至今读来仍令人震撼的数字：
 
@@ -75,7 +75,7 @@ OpenAI 的早期教训颇具戏剧性：他们最初把所有规范塞进一个�
 
 ## 1.3 Anthropic：更早、更系统的 Harness 论述
 
-如果说 OpenAI 的文章是"工程战报"，那么 Anthropic 的系列文章则是"理论奠基"。事实上，Anthropic 是最先系统性提出 Harness 设计理念的公司，分别于 2025 年 11 月 26 日和 2026 年 3 月发布《Effective Harnesses for Long-Running Agents》与《Harness Design for Long-Running Apps》（anthropic.com/engineering）。
+如果说 OpenAI 的文章是"工程战报"，那么 Anthropic 的系列文章则是"理论奠基"。事实上，Anthropic 是最先系统性提出 Harness 设计理念的公司，分别于 2025 年 11 月 26 日和 2026 年 3 月 24 日发布《Effective Harnesses for Long-Running Agents》与《Harness Design for Long-Running Application Development》（后者作者为 Anthropic Labs 团队 Prithvi Rajasekaran；anthropic.com/engineering）。
 
 ### 1.3.1 长任务 Harness：换班工程师问题
 
@@ -107,7 +107,7 @@ Anthropic 给出的解决方案是**双 Agent 结构**：
 - **Token 高效**：返回值要克制，别把整个文件 dump 回去；
 - **把工具描述当作 prompt engineering**：工具描述写得好，模型就能用得好。
 
-最硬的一手实证是：**Claude Sonnet 3.5 仅靠精细化工具描述、不改模型不改 Harness 主体，就在 SWE-bench Verified 上达到了当时的 SOTA**（Anthropic，2025-11）。Anthropic 倡导的方法论是**评估驱动开发**：原型 → 评测 → 分析失败 → 迭代。
+最硬的一手实证是：**Claude Sonnet 3.5 仅靠精细化的工具描述与脚手架设计、不改模型权重，就把 SWE-bench Verified 刷到了当时的 SOTA**（Erik Schluntz《Raising the Bar on SWE-bench Verified with Claude 3.5 Sonnet》，Anthropic，2025-01）。Anthropic 倡导的方法论是**评估驱动开发**：原型 → 评测 → 分析失败 → 迭代。
 
 ### 1.3.3 渐进式披露的另一面：Skills
 
@@ -166,7 +166,7 @@ OpenAI 的 Codex 走了几乎相反的路：开源的 Rust workspace，核心是
 
 ### 1.5.3 Pi Agent：极简主义宣言
 
-Mario Zechner 的 Pi Agent 把极简做到了极致：核心只有 `read / write / edit / bash` **四个工具**，刻意不做 MCP、不做子 Agent、不做 plan 模式、不做权限弹窗，一切交给用户扩展。它的宣言式 README 写道："**there are many agent harnesses, but this one is yours**"。而正是这个"什么都缺"的 Pi，在 Composio 与 Databricks 的基准里拿下了最高通过率、最低成本——极简不是缺陷，是对"模型已经够聪明"的信念投票。
+Mario Zechner 的 Pi Agent 把极简做到了极致：核心只有 `read / write / edit / bash` **四个工具**，刻意不做 MCP、不做子 Agent、不做 plan 模式、不做权限弹窗，一切交给用户扩展——README 原文斩钉截铁："By default, pi gives the model four tools: `read`, `write`, `edit`, and `bash`"，并明确列出 "**No MCP**"、"**No sub-agents**"、"**No permission popups**"，缺什么就自己用扩展造（github.com/badlogic/pi-mono）。而正是这个"什么都缺"的 Pi，在 Composio 与 Databricks 的基准里拿下了最高通过率、最低成本——极简不是缺陷，是对"模型已经够聪明"的信念投票。
 
 ### 1.5.4 Aider：git 原生
 
@@ -179,7 +179,7 @@ Aider 的答案是**以版本控制为中心**：每次修改自动 commit、用
 | Claude Code | Anthropic | Harness 替模型决策 | 状态机、5 层压缩漏斗、27 种 Hook |
 | Codex | OpenAI | 递工具的薄壳 | `loop {}`、OS 级沙箱、MCP |
 | OpenCode | 社区 | 开源多模型 | 曾暴露 harness 层"重排版 bug"——三个模型都试图重排既有代码，证明问题在 harness 而非模型 |
-| Pi Agent | Mario Zechner | 极简 | 4 个工具、无 MCP、"this one is yours" |
+| Pi Agent | Mario Zechner | 极简 | 4 个工具、No MCP、No sub-agents、No permission popups |
 | Aider | 社区 | git 原生 | 自动 commit、repo map、编辑格式 |
 
 那么 DeepSeek Harness 站在光谱的哪个位置？预告一下：它选择了比上述所有产品都激进的一条路——"Everything is a Plugin"，连 Agent 循环本身都是插件。这将是第 2 章和全书后半部分的主线。
@@ -191,7 +191,7 @@ Aider 的答案是**以版本控制为中心**：每次修改自动 commit、用
 1. **模型同质化，Harness 成差异化壁垒。** 同一模型换 harness，基准差距可达 20—26 个百分点、成本差 2—7 倍（Composio 2026-08、Endor Labs 2026-05、Databricks 2026-07）。模型可以租，Harness 必须自己造。
 2. **Context Engineering 是核心战场。** "Agent 看不到的东西等于不存在"（OpenAI）；上下文一致性下降与"上下文焦虑"是长任务失控主因（Anthropic）。压缩策略直接决定成本与稳定性。
 3. **缓存命中是真金白银。** prompt cache 字节级对齐、渐进式披露（15 万 token → 2 千 token），直接换算成毛利率。
-4. **工具设计是杠杆最大的低成本改进。** 仅改工具描述即获 SWE-bench SOTA（Anthropic）——没有哪个模型升级能有这种投入产出比。
+4. **工具设计是杠杆最大的低成本改进。** 仅靠工具描述与脚手架调整、不改模型权重即刷新 SWE-bench Verified SOTA（Anthropic 2025-01）——没有哪个模型升级能有这种投入产出比。
 5. **商业逻辑：从卖 token 到卖工作流结果。** API 价格战之下，按 token 计费没有护城河；按"交付一个可用的工作流结果"计费才有。
 6. **可控性与安全成为准入门槛。** Harness 层决定数据出境、权限边界与可审计性——对企业客户而言，这比跑分重要得多。
 7. **协同进化原则。** Harness 会随模型变强而变薄，但永远不会消失——因为"约束、审计、交接、验证"这些职责，本质上不属于概率模型。
@@ -209,7 +209,7 @@ Aider 的答案是**以版本控制为中心**：每次修改自动 commit、用
 
 ## 1.8 本章参考资料
 
-- [Harness Engineering: Harnessing Codex in an Agent-First World（OpenAI）](https://openai.com/index/harness-engineering/) — 支撑本章 "Humans steer. Agents execute." 与"Agent 看不到的东西等于不存在"等 OpenAI 工程实践论点。
+- [Harness Engineering: Leveraging Codex in an Agent-First World（Ryan Lopopolo，OpenAI，2026-02-11）](https://openai.com/index/harness-engineering/) — 支撑本章 "Humans steer. Agents execute." 与"Agent 看不到的东西等于不存在"等 OpenAI 工程实践论点。
 - [Anthropic Engineering：Effective Harnesses for Long-Running Agents（2025-11）](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) — 支撑本章 Anthropic 对长任务 Agent 失控根源（上下文一致性下降、上下文焦虑）的系统性论述。
 - [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — README 中 "everything is a plugin" 的定位，是本书贯穿的 Agent Harness 工程实例。
 - [Cordis 论文仓库](https://github.com/cordiverse/paper) — 《A Programming Paradigm for Spatiotemporal Composability》摘要把 "self-evolving agent harnesses" 写入动机句，支撑本章 Harness 成为竞争焦点的判断。
@@ -221,3 +221,6 @@ Aider 的答案是**以版本控制为中心**：每次修改自动 commit、用
 - [Composio：Finding the Best Harness（2026-08-11）](https://composio.dev/content/best-ai-agent-harnesses) — 支撑论据四：DeepSeek V4-Flash 在 8 个 harness 下的 240 次运行横评（总通过率 53.8%、单次成功成本 $0.028 vs $0.195）及姊妹篇 Kimi K3 版 68%→88%。
 - [Databricks 官方博客：Benchmarking Coding Agents on Databricks' Multi-Million Line Codebase（2026-07-08）](https://www.databricks.com/blog/benchmarking-coding-agents-databricks-multi-million-line-codebase) — 支撑论据五：同一模型经不同 harness（Claude Code/Codex vs Pi）任务成本相差 2 倍以上而质量持平，Pi 每轮上下文少约 3 倍。
 - [华尔街见闻：Opus 4.6 连续降智翻车一个月，Anthropic 终于公开认错（2026-04-24）](https://wallstreetcn.com/articles/3770813) — 详述 Anthropic 官方事故复盘《An update on recent Claude Code quality reports》（2026-04-23），支撑论据六：reasoning effort 降级、clear_thinking 缓存 bug、system prompt 限长指令三处 harness 层改动叠加导致"变笨"。
+- [Erik Schluntz：Raising the Bar on SWE-bench Verified with Claude 3.5 Sonnet（Anthropic，2025-01）](https://www.anthropic.com/research/swe-bench-sonnet) — 支撑 1.3.2 节"工具描述与脚手架设计刷新 SWE-bench Verified SOTA"的一手实证。
+- [Prithvi Rajasekaran：Harness Design for Long-Running Application Development（Anthropic，2026-03-24）](https://www.anthropic.com/engineering/harness-design-long-running-apps) — 支撑 1.3 节 Anthropic 理论奠基脉络（生成器-评估器三智能体架构、上下文焦虑的结构性解法）。
+- [Pi Agent 仓库 README（badlogic/pi-mono，Mario Zechner）](https://github.com/badlogic/pi-mono) — 支撑 1.5.3 节 Pi 极简设计的一手引语："four tools: read, write, edit, bash"、"No MCP"、"No sub-agents"、"No permission popups"。
