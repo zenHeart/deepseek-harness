@@ -9,7 +9,7 @@
 **Context**（`@deepseek-ai/cordis`，上游 `cordiverse/cordis` packages/core）：
 
 | API | 说明 |
-|----|----|
+|---|---|
 | `ctx.plugin(plugin, config?)` | 加载插件，创建 Fiber 实例；返回 `Fiber & PromiseLike<Fiber>`。同一插件可多次实例化 |
 | `ctx.inject(deps, callback)` | 依赖就绪后执行回调；依赖消失自动卸载、重载自动重启 |
 | `ctx.effect(execute, label?)` | 登记一个可逆 effect；`execute` 可返回 disposer、`Promise<disposer>` 或 (Async)Iterable of disposers；卸载时 LIFO 逆序执行 |
@@ -29,7 +29,7 @@
 **Fiber**（插件的一次实例化，生命周期状态机）：
 
 | API | 说明 |
-|----|----|
+|---|---|
 | `fiber.dispose()` | 卸载：执行全部 disposer |
 | `fiber.restart()` | 卸载并重新执行插件体 |
 | `fiber.update(config)` | 热更新配置（走 `internal/update` 瀑布链） |
@@ -39,7 +39,7 @@
 
 **插件三形态与元数据**：
 
-``` ts
+```ts
 type Plugin = Plugin.Function | Plugin.Constructor | Plugin.Object
 interface Base {
   name?: string
@@ -56,7 +56,7 @@ interface Base {
 ### 16.2.1 命令
 
 | 命令 | 作用 |
-|----|----|
+|---|---|
 | `npx @deepseek-ai/dsh web` | 启动 Web UI（默认 `http://127.0.0.1:3080`），`dsh --profile web` 的别名 |
 | `dsh --profile <name>` | 启动 `$DSH_HOME/profiles/<name>` 下的 profile |
 | `dsh --profile headless "任务文本"` | 一次性无头模式：`completed` 退出码 0，否则 1；不开端口 |
@@ -73,7 +73,7 @@ interface Base {
 ### 16.2.2 配置文件
 
 | 文件 | 用途 |
-|----|----|
+|---|---|
 | `$DSH_HOME/settings.yaml` | 主设置（provider、模型目录等，热重载） |
 | `$DSH_HOME/.credentials.yaml` | 密钥存储（只写，Web UI 写入） |
 | `$DSH_HOME/profiles/<name>/package.json` + `cordis.patch.yml` | profile 插件依赖与用户补丁层 |
@@ -84,7 +84,7 @@ interface Base {
 ### 16.2.3 环境变量
 
 | 变量 | 作用 |
-|----|----|
+|---|---|
 | `DEEPSEEK_API_KEY` / `DEEPSEEK_BASE_URL` | DeepSeek 凭据与可选端点 |
 | `DEEPSEEK_SEARCH_BASE_URL` | web_search 端点 |
 | `DSH_PERMISSION_MODE` | 进程级权限预设：`read-only` / `workspace-write` / `danger-full-access` |
@@ -99,7 +99,7 @@ interface Base {
 `packages/bundle/base/cordis.patch.yml` 是每个 profile 的第一层，约 70 个插件行。任何一行都可被用户 patch 替换（`--dump-config` 查看）。
 
 | 分组 | 插件 |
-|----|----|
+|---|---|
 | 框架 | `cordis-plugin-timer`、`cordis-plugin-hmr` |
 | 核心脊柱 | `dsh-llm`、`dsh-session`、`dsh-typert-*`、`dsh-agent`、`dsh-agent-loop`、`dsh-tools`、`dsh-system-prompt`、`dsh-agent-default-model`（默认 `deepseek-official / deepseek-v4-flash`） |
 | 模型接入 | `dsh-llm-deepseek`、`dsh-llm-pi-ai`（默认休眠，设置热加载）、`dsh-llm-retry`、`dsh-token-meter` |
@@ -115,13 +115,13 @@ interface Base {
 ## 16.4 附录 D：术语表
 
 | 术语 | 定义 |
-|----|----|
-| **Harness** | Agent 的”躯体”：模型之外的一切——工具、循环、会话、沙箱、UI。Model + Harness = Agent |
+|---|---|
+| **Harness** | Agent 的"躯体"：模型之外的一切——工具、循环、会话、沙箱、UI。Model + Harness = Agent |
 | **Profile** | `$DSH_HOME/profiles/<name>/` 下的具名插件组合：有序 bundle 补丁层的叠加 |
 | **Bundle** | Cordis 配置行 + 所挂载代码的分发格式；`package.json` 的 `dsh.profile` / `dsh.bundle` 字段声明身份 |
 | **Patch** | 以行为单位（按 `id`）整体替换或插入插件配置行的覆盖层；分层顺序：bundle → profile patch → home patch → `--patch` |
 | **Fiber** | Cordis 中插件的一次实例化：有生命周期状态机与副作用清单（DisposableList） |
-| **Effect（可撤销效果）** | 每次对上下文的变换都携带逆操作；落地为 `ctx.effect()`，卸载时 LIFO 回滚——“注册即 effect” |
+| **Effect（可撤销效果）** | 每次对上下文的变换都携带逆操作；落地为 `ctx.effect()`，卸载时 LIFO 回滚——"注册即 effect" |
 | **Coeffect（反应式余效果）** | 依赖声明驱动运行时反应：`inject` + 服务上下线自动 notify，依赖就绪自启、消失自卸、重载级联重启 |
 | **Seam（能力缝）** | 三角色结构：Service Definition（接口）/ Provider（实现）/ Consumer（消费方）；换 provider 可整体迁移 Bash/PTY/LSP 到远程沙箱 |
 | **Turn** | 一次用户输入到 agent 停下的完整回合 = 0..n 个 Step |
@@ -143,7 +143,7 @@ interface Base {
 **核心仓库**
 
 - DeepSeek Harness：https://github.com/deepseek-ai/deepseek-harness
-- npm 包：https://www.npmjs.com/package/<span class="citation" data-cites="deepseek-ai/dsh">@deepseek-ai/dsh</span>
+- npm 包：https://www.npmjs.com/package/@deepseek-ai/dsh
 - Cordis：https://github.com/cordiverse/cordis
 - Cordis 论文（preprint）：https://github.com/cordiverse/paper —— *A Programming Paradigm for Spatiotemporal Composability*（未上 arXiv，2026-08 草稿）
 

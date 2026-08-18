@@ -1,0 +1,9 @@
+%%{init: {'theme':'base','themeVariables':{'background':'#FBF8F3','primaryColor':'#F2EADF','primaryBorderColor':'#8A7B66','primaryTextColor':'#3B342B','lineColor':'#8A7B66','secondaryColor':'#D9E2E4','tertiaryColor':'#EAD9C8','fontFamily':'Noto Sans CJK SC'}}}%%
+flowchart TB
+    subgraph L["层叠组合：后层覆盖前层"]
+        A["dsh-base bundle：约 70 个插件行"] --> B["dsh-web-app / dsh-headless bundle"]
+        B --> C["profile 的 cordis.patch.yml（用户补丁）"]
+        C --> D["DSH_HOME/cordis.patch.yml（全局补丁）"]
+        D --> E["--patch 命令行覆盖层"]
+    end
+    E --> F["Cordis Loader 合成插件树"]

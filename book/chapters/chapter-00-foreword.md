@@ -1,14 +1,14 @@
 # 0. 前言
 
-2026 年 8 月 13 日，DeepSeek 开源了两件东西：新一代模型 DeepSeek-V4-Pro，以及一个名为 **DeepSeek Harness（`dsh`）** 的项目。前者是模型，后者是”模型之外的一切”——工具系统、上下文工程、会话管理、安全沙箱、Agent 主循环，全部以一种激进的方式组织起来：**一切皆插件（Everything is a Plugin）**。撑起这套架构的底层框架，是一个名为 **Cordis** 的元框架，其设计论文有一个颇有野心的标题——《A Programming Paradigm for Spatiotemporal Composability》（一种面向时空可组合性的编程范式）。
+2026 年 8 月 13 日，DeepSeek 开源了两件东西：新一代模型 DeepSeek-V4-Pro，以及一个名为 **DeepSeek Harness（`dsh`）** 的项目。前者是模型，后者是"模型之外的一切"——工具系统、上下文工程、会话管理、安全沙箱、Agent 主循环，全部以一种激进的方式组织起来：**一切皆插件（Everything is a Plugin）**。撑起这套架构的底层框架，是一个名为 **Cordis** 的元框架，其设计论文有一个颇有野心的标题——《A Programming Paradigm for Spatiotemporal Composability》（一种面向时空可组合性的编程范式）。
 
-同一年，“Harness”成为了 Agent 工程领域最重要的词。OpenAI 用 5 个月、零人工代码、约 100 万行产出的实验证明了 “Humans steer, agents execute” 不只是一句口号；Anthropic 用一系列工程博客证明”Harness 比模型更重要”；Composio 的基准测试则用数字证明：同一个模型，换一副 Harness，通过率可以相差 20 个百分点，成本可以相差 4 倍。
+同一年，"Harness"成为了 Agent 工程领域最重要的词。OpenAI 用 5 个月、零人工代码、约 100 万行产出的实验证明了 "Humans steer, agents execute" 不只是一句口号；Anthropic 用一系列工程博客证明"Harness 比模型更重要"；Composio 的基准测试则用数字证明：同一个模型，换一副 Harness，通过率可以相差 20 个百分点，成本可以相差 4 倍。
 
 **这本书回答三个问题：**
 
-1.  **Cordis 解决了什么问题，核心原理是什么？** 为什么传统的插件系统和依赖注入框架无法满足 Agent Harness 的需求？“时间可组合性”与”空间可组合性”这两个听起来学术的概念，如何落地成 `ctx.effect()` 和 `inject` 这样具体的代码？
-2.  **DeepSeek Harness 的架构与实现是怎样的？** 从 Profile/Bundle/Patch 三层组合，到 Session 事件溯源日志、Turn/Step 主循环、工具执行管线、模型接入层、上下文压缩、沙箱与审批——我们将逐行阅读源码。
-3.  **如何从 0 到 1 复刻全部能力？** 从安装使用、插件开发，到最后一章手写一个迷你 Agent Harness。
+1. **Cordis 解决了什么问题，核心原理是什么？** 为什么传统的插件系统和依赖注入框架无法满足 Agent Harness 的需求？"时间可组合性"与"空间可组合性"这两个听起来学术的概念，如何落地成 `ctx.effect()` 和 `inject` 这样具体的代码？
+2. **DeepSeek Harness 的架构与实现是怎样的？** 从 Profile/Bundle/Patch 三层组合，到 Session 事件溯源日志、Turn/Step 主循环、工具执行管线、模型接入层、上下文压缩、沙箱与审批——我们将逐行阅读源码。
+3. **如何从 0 到 1 复刻全部能力？** 从安装使用、插件开发，到最后一章手写一个迷你 Agent Harness。
 
 **本书结构**
 

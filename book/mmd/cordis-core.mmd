@@ -1,0 +1,12 @@
+%%{init: {'theme':'base','themeVariables':{'background':'#FBF8F3','primaryColor':'#F2EADF','primaryBorderColor':'#8A7B66','primaryTextColor':'#3B342B','lineColor':'#8A7B66','secondaryColor':'#D9E2E4','tertiaryColor':'#EAD9C8','fontFamily':'Noto Sans CJK SC'}}}%%
+flowchart LR
+    subgraph CTX["Context（Proxy 化上下文）"]
+        R["Registry 插件注册表"]
+        X["Reflect 服务解析与 notify"]
+        E["Events 五种分发模式"]
+    end
+    P["插件模块 export apply"] -->|"ctx.plugin()"| F["Fiber 组件实例：状态机 + 副作用清单"]
+    F -->|"inject 声明"| X
+    S["Service"] -->|"ctx.provide() 可撤销注册"| X
+    X -->|"notify 反应式通知"| F
+    F -->|"注册即 effect"| E

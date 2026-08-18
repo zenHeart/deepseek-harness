@@ -1,0 +1,9 @@
+%%{init: {'theme':'base','themeVariables':{'background':'#FBF8F3','primaryColor':'#F2EADF','primaryBorderColor':'#8A7B66','primaryTextColor':'#3B342B','lineColor':'#8A7B66','secondaryColor':'#D9E2E4','tertiaryColor':'#EAD9C8','fontFamily':'Noto Sans CJK SC'}}}%%
+flowchart TB
+    subgraph LOG["Session 日志（append-only，永不改写）"]
+        direction LR
+        e1["user/message"] --> e2["assistant/message"] --> e3["tool/call"] --> e4["tool/result"] --> e5["compaction/summary"]
+    end
+    LOG -->|deriveMessages 投影| P1["压缩前投影：完整历史（超长）"]
+    e5 -->|"surfaceOp: replace(start,end)"| P2["压缩后投影：摘要 + 近期历史"]
+    P1 -.压缩.-> P2

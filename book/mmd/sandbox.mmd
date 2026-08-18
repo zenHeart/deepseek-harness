@@ -1,0 +1,7 @@
+%%{init: {'theme':'base','themeVariables':{'background':'#FBF8F3','primaryColor':'#F2EADF','primaryBorderColor':'#8A7B66','primaryTextColor':'#3B342B','lineColor':'#8A7B66','secondaryColor':'#D9E2E4','tertiaryColor':'#EAD9C8','fontFamily':'Noto Sans CJK SC'}}}%%
+flowchart TD
+    Q["工具调用请求"] --> A["第一层：审批 seam（ctx.approval）<br/>ask / never · fail-closed<br/>unavailable = 拒绝"]
+    Q --> B["第二层：沙箱 seam（ctx.sandbox）<br/>read-only / workspace-write / danger-full-access"]
+    A --> C["OS 级后端（功能探测，fail-closed）<br/>Linux bwrap / Landlock · macOS Seatbelt · Windows ACL"]
+    B --> C
+    C --> D["执行（Enforcement full / partial 显式上报）"]

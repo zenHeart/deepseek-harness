@@ -1,0 +1,12 @@
+%%{init: {'theme':'base','themeVariables':{'background':'#FBF8F3','primaryColor':'#F2EADF','primaryBorderColor':'#8A7B66','primaryTextColor':'#3B342B','lineColor':'#8A7B66','secondaryColor':'#D9E2E4','tertiaryColor':'#EAD9C8','fontFamily':'Noto Sans CJK SC'}}}%%
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> LOADING: ctx.plugin()
+    LOADING --> ACTIVE: 依赖就绪
+    LOADING --> FAILED: 加载失败
+    ACTIVE --> PENDING: 依赖缺失（休眠）
+    PENDING --> ACTIVE: 依赖重新就绪
+    ACTIVE --> UNLOADING: dispose() / epoch 变化
+    UNLOADING --> ACTIVE: _reload() 级联重启
+    UNLOADING --> DISPOSED: 逆序执行全部 disposer
+    DISPOSED --> [*]
