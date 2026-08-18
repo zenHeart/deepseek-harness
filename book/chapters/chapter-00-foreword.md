@@ -23,6 +23,6 @@
 
 **阅读须知**
 
-- DeepSeek Harness 处于 Developer Preview（v0.1），官方明确声明会有破坏兼容性的变更。本书所有源码引用基于 2026 年 8 月的 master 快照（v0.1.0-rc.5），细节请以官方仓库最新代码为准。
+- DeepSeek Harness 处于 Developer Preview（v0.1），官方明确声明会有破坏兼容性的变更。本书所有源码引用基于 2026 年 8 月的 master 快照（v0.1.0-rc.7），细节请以官方仓库最新代码为准。
 - 书中所有代码片段均标注了其在仓库中的文件路径，建议配合 https://github.com/deepseek-ai/deepseek-harness 与 https://github.com/cordiverse/cordis 对照阅读。
 - 阅读本书需要基本的 TypeScript 知识；不需要任何 Agent 框架经验——我们从零讲起。

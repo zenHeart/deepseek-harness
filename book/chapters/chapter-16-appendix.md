@@ -1,6 +1,6 @@
 # 16. 附录
 
-> 本附录所有内容以 DeepSeek Harness v0.1.0-rc.5 与 Cordis 2026-08 master 快照为准。项目处于 Developer Preview，细节可能随版本变化。
+> 本附录所有内容以 DeepSeek Harness v0.1.0-rc.7 与 Cordis 2026-08 master 快照为准。项目处于 Developer Preview，细节可能随版本变化。
 
 ## 16.1 附录 A：Cordis API 速查
 
@@ -159,7 +159,7 @@ interface Base {
 - 架构：`docs/architecture.md`；Cordis 入门：`docs/cordis-primer.md`
 - 用户指南：Web UI `docs/user/guide/index.md`、providers `docs/user/guide/providers.md`
 - CLI 参考：`apps/cli/reference/README.md`
-- 插件教程：`docs/user/develop/basic/index.md`、`tool.md`；扩展烹饪书：`docs/user/develop/cookbook/`
+- 插件教程：`docs/user/develop/basic/index.md`、`tool.md`；扩展烹饪书：`docs/cookbook/`
 - 子系统：`docs/subsystems/`（tools / approval / sandbox / compaction）；工具执行管线 `docs/tool-execution-pipeline.md`
 - 开发指南与工程宪章：`docs/development.md`、`AGENTS.md`
 - 生成目录（权威 schema 来源）：`docs/tool-catalog.md`、`docs/config-catalog.md`、`docs/module-graph.md`
@@ -181,3 +181,17 @@ interface Base {
 **相关上游**
 
 - Koishi 机器人框架生态（Cordis 源起，作者 Shigma 团队）；上游依赖 `cosmokit`、`schemastery`、`@cordisjs/*`（loader / hmr / group / timer / include）
+
+## 16.6 附录 F：调研手记与证据快照
+
+本书建立在五篇并行调研报告之上（2026-08-13/14 完成），全文收录于仓库 `book/briefs/`，供修订时溯源核对：
+
+| 手记 | 范围 | 关键快照 |
+|---|---|---|
+| `book/briefs/ecosystem.md` | Agent Harness 概念生态 | Hashimoto 命名（2026-02）、OpenAI 百万行实验、Composio/Writer 基准数据 |
+| `book/briefs/cordis.md` | Cordis 论文与上游源码 | `packages/core/src` 共 1848 行（context.ts 78 行 / fiber.ts 486 行）逐文件剖析 |
+| `book/briefs/dsh-source.md` | dsh 仓库源码（rc.5 快照） | README/CONTRIBUTING/AGENTS 要点、monorepo 全景、profile/bundle/patch 机制 |
+| `book/briefs/dsh-usage.md` | 安装、使用与插件开发 | npm/源码两条路径、Web UI 四步上手、profile 体系与凭据解析顺序 |
+| `book/briefs/design-motivation.md` | 设计动机与技术权衡素材 | Koishi → Cordis 编年史、一手引文与来源 URL 清单 |
+
+**勘误说明**：调研手记写作时将 Cordis 作者 Shigma 与 Harness 团队负责人崔添翼标注为同一人；经复核（量子位、36氪、论文署名等一手来源），两人为不同个体——Shigma 本名史一凡，是 Koishi/Cordis 作者、论文一作；崔添翼为量化背景的团队负责人、论文三作。正文 2.2 节与 15.6 节已按此修正，手记原文保留原貌以存证据链。

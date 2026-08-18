@@ -193,7 +193,7 @@ export function apply(ctx: Context) {
 
 **验证**：按 13.3 节方式以 `--patch` 加载后，在 Web UI 里输入 "Use the greet tool to greet Ada."，模型就会发起 `greet` 工具调用并回显 `Hello, Ada!`。
 
-进阶话题（嵌套 schema、后台任务、策略钩子、Code Mode、UI 卡片）参考仓库 `docs/user/develop/cookbook/adding-a-tool.md`。
+进阶话题（嵌套 schema、后台任务、策略钩子、Code Mode、UI 卡片）参考仓库 `docs/cookbook/adding-a-tool.md`。
 
 ## 13.5 扩展点地图：想加什么功能挂哪里
 

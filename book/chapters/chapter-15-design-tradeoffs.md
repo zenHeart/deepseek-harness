@@ -126,7 +126,7 @@ AGENTS.md：“**Pre-release stance: foundation over blast radius**……prefer 
 
 ## 15.6 量化交易纪律的迁移
 
-dsh 的设计气质与大多数 AI 产品不同，原因是人的背景。崔添翼（Shigma）2013 年进入 Jane Street（香港/纽约，覆盖股票与固收），任职九年；2022 年联合创立 TSY Capital，用 Rust 自研低延迟执行系统；2026 年 3 月加入 DeepSeek 组建 Harness 团队（36 氪《在做 Harness 这件事上，DeepSeek 更信搞量化的》；钛媒体报道）。七牛云新闻给出了最直接的同构论述：
+dsh 的设计气质与大多数 AI 产品不同，原因是人的背景。团队负责人崔添翼在 Jane Street（香港/纽约，覆盖股票与固收）任职九年；2022 年联合创立 TSY Capital，用 Rust 自研低延迟执行系统；2026 年 3 月加入 DeepSeek 组建 Harness 团队（36 氪《在做 Harness 这件事上，DeepSeek 更信搞量化的》；钛媒体报道）。与他汇合的是 Cordis 作者史一凡（Shigma）——2020 年发布 Koishi、2022 年抽象出 Cordis、论文一作，同样已加入 DeepSeek。七牛云新闻给出了最直接的同构论述：
 
 > “量化交易的核心工作之一，是把对市场的判断（‘模型’）翻译成能够在真实市场中执行的交易系统（‘Harness’）：信号必须在毫秒内转换为订单，**执行失败需要回退，所有状态必须可审计，系统不能有隐性行为**。这和 AI 编程 Agent 的工程挑战高度同构——在不确定的模型输出和确定的工程执行之间，需要极其严格的控制层。”（news.qiniu.com/archives/1786527719433）
 

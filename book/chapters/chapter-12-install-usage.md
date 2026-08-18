@@ -1,6 +1,6 @@
 # 12. 安装与使用实战
 
-前五章看完了 dsh 的内部机理，本章回到地面：从零把它跑起来、配好、用顺，并把那些文档里散落各处的坑一次性填平。提醒一句贯穿全章的前提：dsh 处于 Developer Preview（v0.1），官方明示**会有兼容性破坏变更**——本文所有命令与字段以 `0.1.0-rc.5` 为准，升级后第一件事是看 changelog。
+前五章看完了 dsh 的内部机理，本章回到地面：从零把它跑起来、配好、用顺，并把那些文档里散落各处的坑一次性填平。提醒一句贯穿全章的前提：dsh 处于 Developer Preview（v0.1），官方明示**会有兼容性破坏变更**——本文所有命令与字段以 `0.1.0-rc.7` 为准，升级后第一件事是看 changelog。
 
 ## 12.1 环境准备
 
@@ -26,7 +26,7 @@ npx @deepseek-ai/dsh web   # 拉取官方 npm 包并以 web profile 启动
 
 ```sh
 npx @deepseek-ai/dsh@latest web   # 强制拉最新版
-npx @deepseek-ai/dsh@0.1.0-rc.5 web  # 钉到某个 rc 复现行为
+npx @deepseek-ai/dsh@0.1.0-rc.7 web  # 钉到某个 rc 复现行为
 ```
 
 另外提醒：官方分发渠道**只有** npm 的 `@deepseek-ai/dsh` 与 GitHub 仓库。PyPI 上存在同名的 `deepseek-harness` / `deepseek-harness-cli`（第三方协议探针工具），与官方项目毫无关系——12.8 节的坑清单还会再强调一次。

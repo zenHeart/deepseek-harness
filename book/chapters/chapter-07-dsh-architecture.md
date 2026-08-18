@@ -38,6 +38,8 @@
 
 这是一个值得借鉴的通用决策模式：当某个框架是你的系统的“承载层”而非“工具层”时，依赖管理的默认姿态（semver + lockfile）是不够的，你需要的是所有权。
 
+所有权不是免费的。以 rc.7 快照量化这笔账：上游 `packages/core/src` 共 1848 行，vendored 后 `vendor/cordis/src` 已增至 2693 行——`vendor/README.md` 用 18 条逐条留痕的本地修改（Local modifications）记录了全部差异，从 `@deepseek-ai` 重新 scoped、`.ts` 显式后缀、JSDoc 全面充实，到 `fiber.ts` 的三处重入处置缺口加固和 `include` patch 算法"插入行不可补丁"的上游缺陷修复（第 11 条）。每条修改都附带动机、行为边界和覆盖测试。换言之，vendoring 的真正成本不是复制代码，而是**建立起一套"分歧台账"纪律**——这也是第 15 章把 vendoring 归入量化交易式供应链纪律的原因。
+
 ## 7.3 Monorepo 全景
 
 dsh 是一个 pnpm 11.7 workspace（根包 `@deepseek-ai/dsh-root@0.1.0-rc.5`）。`pnpm-workspace.yaml` 定义了成员结构：
