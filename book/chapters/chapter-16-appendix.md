@@ -166,13 +166,17 @@ interface Base {
 
 **生态与社区**
 
-- 插件发现：https://github.com/topics/dsh-plugin （228+ 仓库，含 Awesome DSH Plugins 每日兼容性追踪）
+- 插件发现：https://github.com/topics/dsh-plugin （截至 2026-08-18 已超 7000 个公开仓库，含 Awesome DSH Plugins 每日兼容性追踪）
 - TUI 示例：`dsh-tianshu-tui`；第三方 profile 示例：`github:deepseek-harness/turtle-ui`
 - 支持：GitHub Discussions；Discord（英文）；企业微信群 + 微信公众号（中文）
 
 **媒体报道**
 
 - IT之家、网易、财联社等（2026-08-13）：dsh v0.1 与 DeepSeek-V4-Pro 同日开源
+- 界面新闻（2026-08-12）："DeepSeek Harness 团队"公众号完成注册认证 —— https://m.jiemian.com/article/14910886.html
+- 智东西（2026-08-04，腾讯新闻转载）：内测招募 769 人报名 / 712 个去重仓库 / 120 万+ Stars / 18 个赛道 —— https://view.inews.qq.com/a/20260804A0BP5100
+- 量子位（2026-06-22）：崔添翼 5 月起公开招聘 Harness 研究员/工程师/产品经理 —— https://qbitai.com/2026/06/437249.html
+- 新浪（2026-08-13）：内测期间社区已产出约 300 个插件 —— https://cj.sina.cn/articles/view/7880069125/1d5b0500506801tym4
 
 **同名混淆提醒**
 
@@ -195,3 +199,5 @@ interface Base {
 | `book/briefs/design-motivation.md` | 设计动机与技术权衡素材 | Koishi → Cordis 编年史、一手引文与来源 URL 清单 |
 
 **勘误说明**：调研手记写作时将 Cordis 作者 Shigma 与 Harness 团队负责人崔添翼标注为同一人；经复核（量子位、36氪、论文署名等一手来源），两人为不同个体——Shigma 本名史一凡，是 Koishi/Cordis 作者、论文一作；崔添翼为量化背景的团队负责人、论文三作。正文 2.2 节与 15.6 节已按此修正，手记原文保留原貌以存证据链。
+
+**勘误说明（v1.2.0，引用审计）**：初版有三处事实偏差已在本次修订更正——(1) 公众号注册时间误记为 07-06，经界面新闻、IT之家等多源核实应为 2026-08-11/12；(2) "约 300 个社区插件"的时间归属误写为"开源后几天内"，经新浪等多源核实应为内测期间即已产出，开源后呈爆发式增长（GitHub topic `dsh-plugin` 2026-08-18 实时计数超 7000）；(3) 第 1 章论据三"Cursor 46% vs 80%（2024）"未找到可回查的原始出处，已替换为可核验的 Endor Labs 交叉基准数据（同一 GPT-5.5 跨 Codex/Cursor harness 61.5% vs 87.2%）。
