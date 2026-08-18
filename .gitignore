@@ -38,3 +38,7 @@ apps/web/dist/
 worktrees/
 .agents/worktrees/
 .typert-*/
+
+# book build artifacts
+book/epub-content/
+book/*.epub
