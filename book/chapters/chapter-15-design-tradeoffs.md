@@ -10,7 +10,7 @@
 
 ### 15.2.1 从聊天机器人到元框架
 
-Cordis 不是为 dsh 而生的，它的血统要追溯到 2020 年 1 月 Shigma 发布的聊天机器人框架 Koishi（Koishi 官方 FAQ）。2022 年 5 月，Koishi 4.7.1 的 release notes 写下了 Cordis 独立的官方首次表述：“**infra:** 发布了新的核心包 cordis，它作为 Koishi 的底层框架提供了上下文、插件系统、事件模型等核心功能”（github.com/koishijs/koishi/discussions/691）。注意这个动作的方向：不是“为框架加插件系统”，而是**把与聊天领域无关的框架层从业务中抽出来**。这一步决定了 Cordis 后来的自我定位——Shigma 在 cookbook 中写道：
+Cordis 不是为 dsh 而生的，它的血统要追溯到 Shigma 的聊天机器人框架 Koishi（GitHub 仓库创建于 2019 年 12 月，2020 年初正式发布；Koishi 官方 FAQ）。2022 年 5 月，Koishi 4.7.1 的 release notes 写下了 Cordis 独立的官方首次表述：“**infra:** 发布了新的核心包 cordis，它作为 Koishi 的底层框架提供了上下文、插件系统、事件模型等核心功能”（github.com/koishijs/koishi/discussions/691）。注意这个动作的方向：不是“为框架加插件系统”，而是**把与聊天领域无关的框架层从业务中抽出来**。这一步决定了 Cordis 后来的自我定位——Shigma 在 cookbook 中写道：
 
 > “如果让我来定义的话，Cordis 是一个**元框架（Meta Framework）**，即一个用于构建框架的框架。……作为一个元框架，Cordis 并不耦合任何具体的领域或场景。它所提供的能力是大多数框架都不足为奇的——插件系统，但在这个系统背后却是大多数框架都没有达成的目标：**可逆性**。”（《可逆的插件系统》）
 
@@ -126,7 +126,7 @@ AGENTS.md：“**Pre-release stance: foundation over blast radius**……prefer 
 
 ## 15.6 量化交易纪律的迁移
 
-dsh 的设计气质与大多数 AI 产品不同，原因是人的背景。团队负责人崔添翼在 Jane Street（香港/纽约，覆盖股票与固收）任职九年；2022 年联合创立 TSY Capital，用 Rust 自研低延迟执行系统；2026 年 3 月加入 DeepSeek 组建 Harness 团队（36 氪《在做 Harness 这件事上，DeepSeek 更信搞量化的》；钛媒体报道）。与他汇合的是 Cordis 作者史一凡（Shigma）——2020 年发布 Koishi、2022 年抽象出 Cordis、论文一作，同样已加入 DeepSeek。七牛云新闻给出了最直接的同构论述：
+dsh 的设计气质与大多数 AI 产品不同，原因是人的背景。团队负责人崔添翼在 Jane Street（香港/纽约，覆盖股票与固收）任职九年；2022 年联合创立 TSY Capital，用 Rust 自研低延迟交易系统完成执行（钛媒体《梁文锋有了"隆中对"》，2026-05-23）；2026 年 3 月加入 DeepSeek 组建 Harness 团队（36 氪《在做 Harness 这件事上，DeepSeek 更信搞量化的》；钛媒体，2026-05-28）。与他汇合的是 Cordis 作者史一凡（Shigma）——2020 年初发布 Koishi、2022 年抽象出 Cordis、论文一作，同样已加入 DeepSeek。七牛云新闻给出了最直接的同构论述：
 
 > “量化交易的核心工作之一，是把对市场的判断（‘模型’）翻译成能够在真实市场中执行的交易系统（‘Harness’）：信号必须在毫秒内转换为订单，**执行失败需要回退，所有状态必须可审计，系统不能有隐性行为**。这和 AI 编程 Agent 的工程挑战高度同构——在不确定的模型输出和确定的工程执行之间，需要极其严格的控制层。”（news.qiniu.com/archives/1786527719433）
 
@@ -152,13 +152,13 @@ dsh 的设计气质与大多数 AI 产品不同，原因是人的背景。团队
 
 把 dsh 放进同代产品的光谱里看，取舍会更清晰。**Claude Code** 是 TypeScript 单体 + hooks + MCP（仅客户端），“它的很多精华都发生在‘这轮怎么接下一轮’这个问题上……它的 harness 首先是活着的，先得连续活下去，然后才谈如何把规则拆得更漂亮”（harness-books 对比卷）——它选择了迭代速度，扩展面止于 hooks 与 MCP。**Codex CLI** 是 Rust 单体，“把线程、rollout、state bridge、instructions、skills、hooks、sandboxing、exec policy、tools 拆成模块……让控制层显式地长成可组合、可导入、可序列化、可策略化的器官”（同上）——它选择了语言级的性能与类型安全，扩展面同样主要是 MCP。**dsh** 则把整个产品（含 agent loop 本身）放上运行时反应式插件系统。官方文档借媒体之口划出界限：“包括模型适配器、工具注册、Session Log，甚至 Agent Loop 本身都被设计成可以替换的插件……因此，它并不只是‘DeepSeek 版 Claude Code’或者‘DeepSeek 版 Codex’。”（DoNews 报道）
 
-光谱的另一端还有一个参照系：同期爆火的 Pi（约 8.6 万 stars）走“核心极简 + 扩展点克制”路线，社区评论“Claude Code 给你 27 种钩子，Pi 就给你 before/after 两个”（36 氪/量子位报道）。于是这个光谱从极简（Pi：两个钩子）到中度（Claude Code：hooks + MCP）到全量（dsh：132 个插件）排开。没有哪一端天然正确：Pi 赌“约束产生清晰”，dsh 赌“可组合性产生生态”。这是两种关于“复杂性应该住在哪里”的不同回答——Pi 把它挡在核心之外，dsh 把它交给可逆的插件系统去治理。
+光谱的另一端还有一个参照系：同期爆火的 Pi（GitHub 超 9.3 万 stars，2026-08-18 实时计数）走“核心极简 + 扩展点克制”路线，社区评论“Claude Code 给你 27 种钩子，Pi 就给你 before/after 两个”（36 氪/量子位报道）。于是这个光谱从极简（Pi：两个钩子）到中度（Claude Code：hooks + MCP）到全量（dsh：132 个插件）排开。没有哪一端天然正确：Pi 赌“约束产生清晰”，dsh 赌“可组合性产生生态”。这是两种关于“复杂性应该住在哪里”的不同回答——Pi 把它挡在核心之外，dsh 把它交给可逆的插件系统去治理。
 
 ### 15.7.2 掌声与质疑
 
 正面评价集中在两点。其一是架构解放感：第一财经转引开发者称“‘一切皆插件’让模型仅仅成为代理技术栈中一个可替换的部分，同时采用 MIT 这一相对宽松的开源协议，也是一个激进的举措，这‘非常酷也非常早期’”；有用户称“这是他‘向 Claude Code 说再见的那一天’”。其二是生态卡位：Codex 生态合作伙伴宋斐指出，“Harness 对外开放，将意味着第三方进入同一环境后，官方分数与外部复现之间的落差就可以直接核对……如果 Harness 真的开源，行业统一脚手架这个位置，它就有机会先占住。”（南方财经）
 
-质疑同样值得如实记录。InfoQ 评价“有创新但编排范式未突破”（经 aireadinghub.com 转引）——插件化改变了扩展方式，但 agent 与模型交互的基本回合结构仍是 ReAct 一脉。chooseai 在报道崔添翼招聘时给出迁移风险分析：“从量化交易系统迁移到面向开发者的 Agent 产品，目标用户、反馈循环与发布节奏完全不同，过往经验的可迁移性需要在实际产品中验证。”“Jane Street 风格的工程文化在国内招聘市场并不容易复制。”官方自己也压低了预期：developer preview，“THERE WILL BE COMPATIBILITY-BREAKING CHANGES”。
+质疑同样值得如实记录。InfoQ 评价“有创新但编排范式未突破”（知乎专栏《DeepSeek Harness 深度研究》转引，2026-08-14）——插件化改变了扩展方式，但 agent 与模型交互的基本回合结构仍是 ReAct 一脉。chooseai 在报道崔添翼招聘时给出迁移风险分析：“从量化交易系统迁移到面向开发者的 Agent 产品，目标用户、反馈循环与发布节奏完全不同，过往经验的可迁移性需要在实际产品中验证。”“Jane Street 风格的工程文化在国内招聘市场并不容易复制。”（chooseai.net，2026-05-21）官方自己也压低了预期：developer preview，“THERE WILL BE COMPATIBILITY-BREAKING CHANGES”。
 
 本书作者的视角是：这些质疑与 dsh 的设计并不矛盾，反而互相印证。“编排范式未突破”是事实，但 dsh 的赌注本来就不在编排范式上，而在**承载编排的基础设施**上——当范式真的被突破的那一天（无论是 PTC、自进化还是别的什么），能以最低成本接纳新范式的是“循环本身也是插件”的架构，而不是 loop 焊死在单体里的架构。创造模式就是这一赌注的提前演示。至于量化文化的可迁移性，15.6 节的映射表是设计层面的证据，但产品层面的证据只能由时间给出——这一点本书与批评者持同样的开放态度。
 
@@ -177,6 +177,13 @@ dsh 的设计气质与大多数 AI 产品不同，原因是人的背景。团队
 - [DeepSeek Harness 官方发布文（微信公众号）](https://mp.weixin.qq.com/s/mANdGRI4fO_sEbC1ECEoZQ) — 支撑本章"一切皆插件"总纲、四种运行模式与 132 插件截图的权衡背景。
 - [Jiayuan Zhang 推文](https://x.com/jiayuan_jy/status/2087911060154314963) — 乐高汽车隐喻、自进化软件雏形与函数式风格的解读，支撑本章对 dsh 设计哲学的讨论。
 - [七牛云新闻：量化思维与 Harness 工程同构](https://news.qiniu.com/archives/1786527719433) — 支撑本章 Jane Street 经验迁移（可审计、可回退、无隐性行为）的方法论论述。
+- [钛媒体：梁文锋有了"隆中对"（2026-05-23）](https://www.tmtpost.com/7999833.html) — 支撑 TSY Capital"机器学习生成信号 + Rust 自研低延迟交易系统"的细节。
+- [钛媒体：在做 Harness 这件事上，DeepSeek 更信搞量化的（2026-05-28）](https://www.tmtpost.com/8005695.html) — 支撑崔添翼完整履历（2008 保送浙大、ACM 六金、2013 入 Jane Street、2022 联创 TSY、2026-03 加入 DeepSeek）。
+- [chooseai：DeepSeek 点将崔添翼（2026-05-21）](https://www.chooseai.net/news/3901/) — 迁移风险分析与"Jane Street 风格工程文化不易复制"引语原文。
+- [知乎专栏：DeepSeek Harness 深度研究（2026-08-14）](https://zhuanlan.zhihu.com/p/2071546145608880421) — 转引 InfoQ"有创新但编排范式未突破"评价。
+- [第一财经（新浪转载）：DeepSeek Harness 预览版来了（2026-08-13）](https://finance.sina.com.cn/tech/roll/2026-08-13/doc-inineuqm9899462.shtml) — "非常酷也非常早期""向 Claude Code 说再见的那一天"等开发者评价原文。
+- [21 世纪经济报道：DeepSeek Harness 公众号正式上线（2026-08-11）](https://www.sfccn.com/2026/8-11/wOMDE0MDdfMjIwNjAwOQ.html) — 宋斐"官方分数可核对、行业统一脚手架"论述原文。
+- [Pi Agent 仓库（badlogic/pi-mono）](https://github.com/badlogic/pi-mono) — README 原文"four tools: read, write, edit, bash""No MCP""No sub-agents""No permission popups"的一手出处；stars 数实时可查。
 - [DoNews 报道](https://www.donews.com/news/detail/1/6670452.html) — 支撑本章 dsh 与 Claude Code / Codex 路线差异（"不只是 DeepSeek 版 Claude Code"）的取舍讨论。
 - [Agent Harness 对比卷（harness-books）](https://harness-books.agentway.dev/book2-comparing/exported/book2-comparing.pdf) — 支撑本章三条路线结构性差异（hooks 单体 / Rust 单体 / 运行时插件系统）的社区一手分析。
 - [chooseai 分析](https://www.chooseai.net/news/3901/) — 支撑本章"未决问题"小节中量化经验迁移风险与工程文化复制难度的质疑面材料。
