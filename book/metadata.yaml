@@ -1,0 +1,73 @@
+# ============================================================
+# 每仓库旋钮 —— 套用到新仓库时主要改这个文件（外加 cover.svg 与 workflow）
+# 解析方式：validate.js / postprocess.js 用轻量正则读取，无需 YAML 库。
+# 因此请保持字段写法与下方示例一致（字符串带双引号，数组写成单行 [..]）。
+# ============================================================
+
+# --- 书籍元信息 ---
+title: "从 Cordis 到 DeepSeek Harness"
+subtitle: "Agent Harness 源码级深度剖析"
+author: "Kimi Deep Research"
+language: "zh-CN"
+date: "2026-08-18"                 # 写入 epub dcterms:modified，建议填实际日期
+version: "1.0.0"
+publisher: "zenHeart"
+description: "从 Cordis 时空可组合性原理到 DeepSeek Harness 源码与实战复刻的深度技术书"
+rights: "Copyright © 2026 Kimi Deep Research"
+book_id: "deepseek-harness-handbook"
+
+# --- 源仓库与源码链接改写 ---
+# 正文里写仓库相对路径（如 src/foo.ts#L10），构建时自动转成：
+#   {repo_url}/blob/{source_ref}/src/foo.ts#L10
+repo_url: "https://github.com/zenHeart/deepseek-harness"
+source_ref: "master"               # fork 后用于写书的分支或 tag
+
+# source_dirs：哪些顶层目录算「可链接源码」。决定 validate.js / postprocess.js
+# 识别并改写哪些相对路径。按目标仓真实结构填，支持含点的目录（如 .github）。
+source_dirs: ["packages", "apps", "vendor", "python", "native", "scripts", "docs", "examples", "website"]
+
+# doc_dirs（可选）：放 .md 设计文档的目录，用于校验正文里的 docs 引用是否存在。
+# 留空数组 [] 则关闭 docs 引用校验。
+doc_dirs: []
+
+# upstream_repo（可选）：fork 的上游 "owner/name"。正文源码链接不得指向它
+# （应指向你自己的 fork）。留空 "" 则关闭该校验。
+upstream_repo: "deepseek-ai/deepseek-harness"
+
+# --- 章节清单 ---
+# 按「理解依赖」排序，而非功能菜单。开篇建议是一章「架构与权衡总览」。
+# items 是 book/chapters/ 下的文件名，文件名形如 chapter-NN-slug.md。
+chapters:
+  - part: "第 1 部分：开篇"
+    items:
+      - chapter-00-foreword.md
+  - part: "第 2 部分：认知篇"
+    items:
+      - chapter-01-model-harness-agent.md
+      - chapter-02-deepseek-harness-origin.md
+  - part: "第 3 部分：Cordis 原理篇"
+    items:
+      - chapter-03-cordis-problem.md
+      - chapter-04-effect-coeffect.md
+  - part: "第 4 部分：Cordis 源码篇"
+    items:
+      - chapter-05-cordis-source-context-fiber.md
+      - chapter-06-cordis-loader-hmr.md
+  - part: "第 5 部分：dsh 架构篇"
+    items:
+      - chapter-07-dsh-architecture.md
+      - chapter-08-session-agent-loop.md
+      - chapter-09-tool-system.md
+      - chapter-10-llm-context-engineering.md
+      - chapter-11-security-sandbox-approval.md
+  - part: "第 6 部分：dsh 实战篇"
+    items:
+      - chapter-12-install-usage.md
+      - chapter-13-plugin-development.md
+  - part: "第 7 部分：复刻与设计篇"
+    items:
+      - chapter-14-mini-harness-rebuild.md
+      - chapter-15-design-tradeoffs.md
+  - part: "第 8 部分：附录"
+    items:
+      - chapter-16-appendix.md
