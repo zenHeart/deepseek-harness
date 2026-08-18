@@ -137,7 +137,7 @@ SIGINT/SIGTERM 触发最多 5 秒的优雅释放（插件 disposer 链回滚）�
 
 ### 12.5.5 官方没有 TUI 这件事
 
-很多从 Claude Code / Codex 转来的用户第一反应是找终端界面。dsh 官方界面只有 Web UI 和 headless，**没有自带 TUI**——终端界面由社区插件提供（如 turtle-ui；类似的还有 `dsh-tianshu-tui`）。这本身就是 profile 体系的最好广告：交互层不过是可以整体替换的一层 bundle。在 GitHub 上搜 topic `dsh-plugin` 可以发现数百个社区插件（该 topic 下 2026 年 8 月已有 228+ 公开仓库），包括 Web UI 皮肤、视觉/OCR 工具、VS Code 集成等；生态里甚至出现带"每日兼容性追踪"的 Awesome 目录——侧面印证 Developer Preview 阶段 breaking change 的频繁程度，装第三方插件前务必核对它声明兼容的 dsh 版本。
+很多从 Claude Code / Codex 转来的用户第一反应是找终端界面。dsh 官方界面只有 Web UI 和 headless，**没有自带 TUI**——终端界面由社区插件提供（如 turtle-ui；类似的还有 `dsh-tianshu-tui`）。这本身就是 profile 体系的最好广告：交互层不过是可以整体替换的一层 bundle。在 GitHub 上搜 topic `dsh-plugin` 可以发现数千个社区插件（截至 2026 年 8 月 18 日，该 topic 下已有 7000+ 公开仓库），包括 Web UI 皮肤、视觉/OCR 工具、VS Code 集成等；生态里甚至出现带"每日兼容性追踪"的 Awesome 目录——侧面印证 Developer Preview 阶段 breaking change 的频繁程度，装第三方插件前务必核对它声明兼容的 dsh 版本。
 
 ## 12.6 配置体系：settings、credentials 与 profiles
 

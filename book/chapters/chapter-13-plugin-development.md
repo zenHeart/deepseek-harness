@@ -315,7 +315,7 @@ dsh plugin --profile <name> add <spec>     # 也支持 remove / why / update 等
 
 ### 13.8.2 发布与生态现状
 
-发布插件的流程：正常发布 npm 包（或直接用 GitHub 仓库分发），给仓库加上 GitHub topic **`dsh-plugin`** 即可被社区发现。截至 2026 年 8 月，该 topic 下已有 **228+ 个公开仓库**（媒体报道称开源几天内社区产出约 300 个插件），生态包括：
+发布插件的流程：正常发布 npm 包（或直接用 GitHub 仓库分发），给仓库加上 GitHub topic **`dsh-plugin`** 即可被社区发现。截至 2026 年 8 月 18 日，该 topic 下已有 **7000+ 个公开仓库**（GitHub Topics 实时计数；据新浪等媒体报道，内测期间社区已产出约 300 个插件，开源后呈爆发式增长），生态包括：
 
 - TUI 界面（`dsh-tianshu-tui`——官方无自带 TUI，终端界面靠社区）；
 - Web UI 皮肤与面板；
@@ -364,5 +364,5 @@ dsh plugin --profile <name> add <spec>     # 也支持 remove / why / update 等
 - [docs/user/develop/basic/tool.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/user/develop/basic/tool.md) — 支撑本章用 `defineTool` 编写工具插件的完整示例与验证流程。
 - [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 支撑本章"新功能挂哪里"扩展点对照表与 profile/bundle 层叠顺序。
 - [docs/development.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/development.md) — 支撑本章 Host/Client 双聚合构建、typecheck/check:all 等日常开发命令。
-- [GitHub topic: dsh-plugin](https://github.com/topics/dsh-plugin) — 支撑本章插件发现机制与 228+ 社区插件生态（TUI、VS Code 集成、Awesome DSH Plugins 等）。
+- [GitHub topic: dsh-plugin](https://github.com/topics/dsh-plugin) — 支撑本章插件发现机制与社区插件生态（TUI、VS Code 集成、Awesome DSH Plugins 等；截至 2026-08-18 该 topic 下已超 7000 个公开仓库）。
 - [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — 支撑本章 `dsh plugin add` 安装第三方插件与 pnpm allowBuilds 拦截的预期行为。
