@@ -18,7 +18,7 @@
 
 **第五，waterfall 必须 `next()`。** Cordis 的 waterfall 事件是 around-middleware：监听器收到 `(...args, next)`，不调用 `next()` 即短路整条链。这既是能力（任何插件都可以拦截、改写、否决一次调用），也是陷阱（忘记委派会静默掐断后续所有监听器），所以被写进宪章反复强调。
 
-**第六，发布前立场：正确地基优先于兼容垫片。** `SESSION_FORMAT_VERSION` 保持 `0`，SQLite 使用单调递增的 `SCHEMA_VERSION`。README 也直言项目处于 developer preview，“明确声明会有兼容性破坏变更”。CONTRIBUTING 则更坦率：团队很小，暂不接受外部 PR，建议以写插件、写博客、答问题的方式参与生态——*“You may consider this repository an idea, an official showcase, and a source of inspiration, but not a mandate.”*
+**第六，发布前立场：正确地基优先于兼容垫片。** `SESSION_FORMAT_VERSION` 保持 `0`，SQLite 使用单调递增的 `SCHEMA_VERSION`。README 也直言项目处于 developer preview，“明确声明会有兼容性破坏变更”。CONTRIBUTING 则更坦率：团队很小，暂不接受外部 PR，建议以写插件、写博客、答问题的方式参与生态——*"You may consider this repository an idea, an official showcase, and a source of inspiration, but not a mandate."*
 
 其余工程约束也值得一提：每个 npm 包命名 `@deepseek-ai/dsh-<name>`；vendored 包重新 scoped 且 `private: true`；`@deepseek-ai/cordis` 是每个 harness 包的 peerDependency；全仓库 ESM（`"type": "module"`），CLI 源码启动走 `node --import tsx/esm`；Node 引擎要求 `^22.19.0 || >=24.0.0`，包管理器锁定 `pnpm@11.7.0`。
 
@@ -42,7 +42,7 @@
 
 dsh 是一个 pnpm 11.7 workspace（根包 `@deepseek-ai/dsh-root@0.1.0-rc.5`）。`pnpm-workspace.yaml` 定义了成员结构：
 
-``` yaml
+```yaml
 packages:
   - vendor/*                  # vendored Cordis 框架层
   - packages/*/*              # 全部 harness 包（<group>/<pkg> 两层结构）
@@ -58,7 +58,7 @@ packages:
 **表 7-1　dsh `packages/` 分组职责地图**
 
 | 分组 | 职责 |
-|----|----|
+|---|---|
 | `core/` | 产品 API 脊柱：`session`（事件溯源日志）、`system-prompt`（提示词装配）、`tools`（工具注册表+执行管线）、`agent`（Agent 接口/注册表）、`agent-loop`（默认驱动）、`scope`（agent 作用域注册原语） |
 | `llm/` | 模型接入层：`llm`（消息/流词汇 + adapter seam，`ctx.llm`）、`llm-deepseek`（DeepSeek 官方适配器）、`llm-pi-ai`（多 provider 适配器）、`llm-retry`、`token-meter` |
 | `shell/`、`subprocess/`、`terminal/` | bash/pwsh 能力 seam + 本地/pwsh provider + 持久 PTY 会话 |
@@ -71,21 +71,21 @@ packages:
 | `web/`、`client/`、`host/`、`api/` | Web 服务能力 seam、约 40 个 React 客户端 UI 插件、BFF/API 网关 |
 | `boot/`、`bundle/` | 启动胶水与 profile 分层 bundle；`apps/cli` 提供 `dsh` bin |
 | `e2b/`、`lsp/`、`mcp/`、`hooks/`、`acp/`、`sdk/` | E2B 沙箱 POC、语言服务器、MCP、Claude Code/Codex hook 桥、ACP 自动化协议、TS/Python SDK |
-| `typert/` | 自研的类型图生成/RPC 反射系统（“Typert”） |
+| `typert/` | 自研的类型图生成/RPC 反射系统（"Typert"） |
 
-每个包的 `package.json` description 本身就是职责说明，例如 `@deepseek-ai/dsh-agent-loop` 是 *“The concrete agent loop plugin for the DeepSeek Harness”*，`@deepseek-ai/dsh-session` 是 *“Event-sourced session store”*，`@deepseek-ai/dsh-tools` 是 *“Tool registry and execution pipeline”*。构建上采用 TypeScript project references 双聚合（host/client 分离，以避免 Cordis `Context` 声明合并冲突）+ tsdown 打包，测试用 vitest 分 unit/e2e/snapshot/web/perf/stress 六套配置。
+每个包的 `package.json` description 本身就是职责说明，例如 `@deepseek-ai/dsh-agent-loop` 是 *"The concrete agent loop plugin for the DeepSeek Harness"*，`@deepseek-ai/dsh-session` 是 *"Event-sourced session store"*，`@deepseek-ai/dsh-tools` 是 *"Tool registry and execution pipeline"*。构建上采用 TypeScript project references 双聚合（host/client 分离，以避免 Cordis `Context` 声明合并冲突）+ tsdown 打包，测试用 vitest 分 unit/e2e/snapshot/web/perf/stress 六套配置。
 
 ## 7.4 Cordis 五要素在 dsh 中的体现
 
 `docs/cordis-primer.md` 把 Cordis 总结为五要素，dsh 把每一条都用到了极致：
 
-1.  **插件即 Service 对象**——一个带可选 `inject` 与 `apply(ctx)` 的函数，或 `Service` 子类。dsh 中从 `dsh-agent-loop` 到 `dsh-token-meter`，所有包都是这种形态。
-2.  **Context 即服务仓库**——服务占据稳定的 `ctx.<key>`（`ctx.tools`、`ctx.llm`、`ctx.sessions`、`ctx.sandbox`、`ctx.approval`…），消费者按 key 而非具体实现相互发现。这是 dsh 可替换性的根源。
-3.  **`inject` 声明依赖**——加载顺序由服务可用性驱动，而非手工 boot 排序。base bundle 的注释原文说得很明白：*“Row order carries no load semantics (activation is service-availability driven)”*——配置里行的顺序不携带加载语义。
-4.  **类型化事件**——用 TypeScript declaration merging 扩展事件名（`SessionEventMap` 成员默认 required-on-read），以 `emit` / `waterfall` / `parallel` / `serial` 四种模式分发（dsh 文档归纳为四种常用模式；Cordis 内核另有同步短路的 bail，共五种，见 5.7 节）。
-5.  **注册即可逆 effect**——卸载自动回滚。
+1. **插件即 Service 对象**——一个带可选 `inject` 与 `apply(ctx)` 的函数，或 `Service` 子类。dsh 中从 `dsh-agent-loop` 到 `dsh-token-meter`，所有包都是这种形态。
+2. **Context 即服务仓库**——服务占据稳定的 `ctx.<key>`（`ctx.tools`、`ctx.llm`、`ctx.sessions`、`ctx.sandbox`、`ctx.approval`…），消费者按 key 而非具体实现相互发现。这是 dsh 可替换性的根源。
+3. **`inject` 声明依赖**——加载顺序由服务可用性驱动，而非手工 boot 排序。base bundle 的注释原文说得很明白：*"Row order carries no load semantics (activation is service-availability driven)"*——配置里行的顺序不携带加载语义。
+4. **类型化事件**——用 TypeScript declaration merging 扩展事件名（`SessionEventMap` 成员默认 required-on-read），以 `emit` / `waterfall` / `parallel` / `serial` 四种模式分发（dsh 文档归纳为四种常用模式；Cordis 内核另有同步短路的 bail，共五种，见 5.7 节）。
+5. **注册即可逆 effect**——卸载自动回滚。
 
-![dsh 总体架构](../images/file7.png)
+![dsh 总体架构](../images/fig-08-dsh-arch.png)
 
 *图 7-1 dsh 总体架构*
 
@@ -101,7 +101,7 @@ packages:
 
 层叠顺序为：profile 列出的各 bundle（按 `dsh.profile.bundles` 顺序）→ profile 自己的 `cordis.patch.yml` → home 级 `$DSH_HOME/cordis.patch.yml` → 命令行 `--patch` overlay。后层覆盖前层，且**任何一行都可被用户 patch 替换**。调试组合结果的标准手段是：
 
-``` sh
+```sh
 dsh --profile web --dump-config   # 打印实际启动树
 ```
 
@@ -127,7 +127,7 @@ dsh --profile web --dump-config   # 打印实际启动树
 
 Cordis loader 的配置支持 `!!js` 表达式插值（见 `cordis-primer.md`“Loader Configuration”），base bundle 大量使用它把“启动环境”编织进配置。真实片段（`packages/bundle/base/cordis.patch.yml`）：
 
-``` yaml
+```yaml
 - id: tool-bash
   name: '@deepseek-ai/dsh-tool-bash'
   disabled: !!js process.platform === 'win32'
@@ -146,7 +146,7 @@ Cordis loader 的配置支持 `!!js` 表达式插值（见 `cordis-primer.md`“
 
 第一行按平台禁用 bash（Windows 上由 pwsh 顶替）；第二行把权限模式与工作区根目录绑定到环境变量和当前目录；第三行最妙——当用户选择 `danger-full-access` 时，审批策略直接降为 `never`，否则保持 `ask`。环境适配不需要任何命令行分支代码，全部在配置层声明完成。
 
-![dsh 分层组合架构](../images/file8.png)
+![dsh 分层组合架构](../images/mm-dsh-layers.png)
 
 *图 7-2 dsh 分层组合架构*
 
@@ -167,7 +167,7 @@ Cordis loader 的配置支持 `!!js` 表达式插值（见 `cordis-primer.md`“
 
 - [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — 本章 monorepo 结构、包分组职责地图与 vendored Cordis 的全部事实来源（master，v0.1.0-rc.5）。
 - [崔添翼（tianyi）MIT 发布原推](https://x.com/tianyi/status/2087888089759015218) — 作者宣布 dsh 以 MIT 协议开源的一手来源，支撑本章项目身份与发布背景。
-- [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 支撑本章 Profile / Bundle / Patch 三层组合与”无特权核心”架构描述。
-- [AGENTS.md](https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/AGENTS.md) — 支撑本章 “Registrations are effects”、“Plugins, not loop changes” 等工程宪章约定。
+- [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 支撑本章 Profile / Bundle / Patch 三层组合与"无特权核心"架构描述。
+- [AGENTS.md](https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/AGENTS.md) — 支撑本章 "Registrations are effects"、"Plugins, not loop changes" 等工程宪章约定。
 - [packages/bundle/base/cordis.patch.yml](https://github.com/zenHeart/deepseek-harness/blob/master/packages/bundle/base/cordis.patch.yml) — 支撑本章约 70 个内置插件行的清单与 `!!js` 表达式插值示例。
 - [vendor/README.md](https://github.com/zenHeart/deepseek-harness/blob/master/vendor/README.md) — 支撑本章 vendoring 动机（auditable, patchable, pinned）与上游快照同步策略。

@@ -9,7 +9,7 @@
 **选型决策**：
 
 | 决策点 | 选择 | 理由 |
-|----|----|----|
+|---|---|---|
 | 运行时 | Node.js 22+ | 自带 `fetch`、Web Streams，零原生依赖 |
 | 模块体系 | ESM（`"type": "module"`） | 与 dsh 全仓一致；`.js` 后缀的相对导入是 ESM + TypeScript 的标准写法 |
 | 执行方式 | `tsx` 直接跑 TS | 免构建，对齐 dsh 的 `node --import tsx/esm` 开发体验 |
@@ -19,7 +19,7 @@
 
 **文件树**：
 
-```
+```text
 mini-harness/
 ├── package.json
 ├── tsconfig.json
@@ -34,7 +34,7 @@ mini-harness/
 
 **`package.json`**：
 
-``` json
+```json
 {
   "name": "mini-harness",
   "private": true,
@@ -52,7 +52,7 @@ mini-harness/
 
 **`tsconfig.json`**：
 
-``` json
+```json
 {
   "compilerOptions": {
     "target": "ES2022",
@@ -68,23 +68,23 @@ mini-harness/
 
 初始化：
 
-``` sh
+```sh
 mkdir mini-harness && cd mini-harness
 # 写入上面的 package.json / tsconfig.json
 pnpm install
 ```
 
-![迷你 Harness 的组件结构](../images/file16.png)
+![迷你 Harness 的组件结构](../images/mm-mini-harness.png)
 
 *图 14-1 迷你 Harness 的组件结构*
 
 ## 14.2 Session：append-only 事件日志与投影
 
-dsh 的第一性原理是”**Session 日志是唯一事实源**”：模型历史不是被直接维护的消息数组，而是从事件日志**投影（derive）**出来的。fork、resume、压缩、审计都从同一流派生。我们也照此办理。
+dsh 的第一性原理是"**Session 日志是唯一事实源**"：模型历史不是被直接维护的消息数组，而是从事件日志**投影（derive）**出来的。fork、resume、压缩、审计都从同一流派生。我们也照此办理。
 
 `src/session.ts`：
 
-``` ts
+```ts
 // ---- 消息词汇（模型可见） ----
 export interface ToolCall {
   id: string
@@ -120,7 +120,7 @@ export type LoggedEvent = SessionEvent & { seq: number }
 
 接下来是 `Session` 类——日志本体与投影：
 
-``` ts
+```ts
 export class Session {
   private events: LoggedEvent[] = []
 
@@ -176,9 +176,9 @@ export class Session {
 
 设计要点：
 
-1.  **`append` 是唯一写入口**，且只增不改（append-only）。`onAppend` 回调是给持久化层的接缝——日志本体不关心自己落在 JSONL 还是 SQLite。
-2.  **`deriveMessages()` 就是 dsh 的同名投影**。哪些事件进模型请求、哪些只是协调事实，全在这个函数里决定。这实现了 dsh 的不变量”Model-Visible ⟺ Logged”的迷你版：模型看到的一切都能从日志重建。
-3.  `turn/*`、`step/*`、`tool/call` 不进投影（`tool/call` 的内容已由 assistant 消息的 `toolCalls` 承载）；`tool/result` 投影为 `role: 'tool'` 消息。
+1. **`append` 是唯一写入口**，且只增不改（append-only）。`onAppend` 回调是给持久化层的接缝——日志本体不关心自己落在 JSONL 还是 SQLite。
+2. **`deriveMessages()` 就是 dsh 的同名投影**。哪些事件进模型请求、哪些只是协调事实，全在这个函数里决定。这实现了 dsh 的不变量"Model-Visible ⟺ Logged"的迷你版：模型看到的一切都能从日志重建。
+3. `turn/*`、`step/*`、`tool/call` 不进投影（`tool/call` 的内容已由 assistant 消息的 `toolCalls` 承载）；`tool/result` 投影为 `role: 'tool'` 消息。
 
 ## 14.3 LLM 适配 seam：OpenAI 兼容协议的 SSE 流
 
@@ -186,7 +186,7 @@ dsh 的 `ctx.llm` 是一个 adapter seam：消费者只面对统一的 `stream(r
 
 `src/llm.ts` 前半——词汇定义：
 
-``` ts
+```ts
 import type { Message, ToolCall } from './session.js'
 
 export interface ToolSchema {
@@ -216,7 +216,7 @@ export interface LlmProvider {
 
 后半——OpenAI 兼容适配器：
 
-``` ts
+```ts
 export class OpenAICompatProvider implements LlmProvider {
   constructor(
     private opts: { baseURL: string; apiKey: string; model: string },
@@ -304,15 +304,15 @@ function toWire(m: Message): Record<string, unknown> {
 
 三个易错点值得强调：
 
-1.  **SSE 是字节流不是行流**。`reader.read()` 返回的块边界与 `\n` 不对齐，必须先 `decoder.decode(chunk, { stream: true })` 拼入缓冲再按行切。多字节 UTF-8 字符跨块时 `{ stream: true }` 保证不乱码。
-2.  **tool_calls 是增量下发的**。流式协议中工具调用的 `id`、`name`、`arguments` 分散在多个 chunk 里（`arguments` 是 JSON 字符串的碎片），所以我们的 `Chunk` 是 delta 而不是完整调用——组装逻辑在 loop 的收集器里（14.5 节）。
-3.  **`toWire` 是单向翻译**。内部词汇（`Message`）与协议词汇（wire JSON）分离，与 dsh `llm-deepseek` 的 `translate.ts` 同构。assistant 消息在没有工具调用时**不能**带空的 `tool_calls` 字段，部分网关会报错。
+1. **SSE 是字节流不是行流**。`reader.read()` 返回的块边界与 `\n` 不对齐，必须先 `decoder.decode(chunk, { stream: true })` 拼入缓冲再按行切。多字节 UTF-8 字符跨块时 `{ stream: true }` 保证不乱码。
+2. **tool_calls 是增量下发的**。流式协议中工具调用的 `id`、`name`、`arguments` 分散在多个 chunk 里（`arguments` 是 JSON 字符串的碎片），所以我们的 `Chunk` 是 delta 而不是完整调用——组装逻辑在 loop 的收集器里（14.5 节）。
+3. **`toWire` 是单向翻译**。内部词汇（`Message`）与协议词汇（wire JSON）分离，与 dsh `llm-deepseek` 的 `translate.ts` 同构。assistant 消息在没有工具调用时**不能**带空的 `tool_calls` 字段，部分网关会报错。
 
 ## 14.4 工具注册表与 bash / edit 两个工具
 
 `src/tools.ts`。注册表对应 dsh 的 `ctx.tools`——注意 `register` 返回 disposer（注册即 effect）：
 
-``` ts
+```ts
 import { execFile } from 'node:child_process'
 import { readFile, writeFile } from 'node:fs/promises'
 import type { ToolSchema } from './llm.js'
@@ -351,7 +351,7 @@ export class ToolRegistry {
 
 bash 工具——用 `execFile` 而非 `exec` 以避开 shell 注入面，加超时与工作区约束：
 
-``` ts
+```ts
 export function bashTool(workspace: string): Tool {
   return {
     name: 'bash',
@@ -385,9 +385,9 @@ export function bashTool(workspace: string): Tool {
 
 一个细节：**非零退出码不视为工具错误**。`grep` 没匹配到就退出 1，这恰恰是模型需要看到的信息。真正的工具错误（超时、abort）才抛异常。
 
-edit 工具——字面量替换，与 dsh 自带 `edit` 工具语义一致（“Literal text to replace. Must match exactly.”）：
+edit 工具——字面量替换，与 dsh 自带 `edit` 工具语义一致（"Literal text to replace. Must match exactly."）：
 
-``` ts
+```ts
 export function editTool(workspace: string): Tool {
   return {
     name: 'edit',
@@ -424,15 +424,15 @@ export function editTool(workspace: string): Tool {
 }
 ```
 
-设计取舍：要求 `old_string` **唯一匹配**，不唯一就报错让模型带更多上下文重试——这是 Claude Code / dsh 系工具的通行做法，比”默认替换第一个”安全得多。
+设计取舍：要求 `old_string` **唯一匹配**，不唯一就报错让模型带更多上下文重试——这是 Claude Code / dsh 系工具的通行做法，比"默认替换第一个"安全得多。
 
 ## 14.5 主循环与 MiniContext
 
-主循环运行在一个迷你 Cordis 上。先看 MiniContext 的实现——它是全书的”压轴代码”，把第 5 章读过的 Cordis 内核压缩成不足百行。
+主循环运行在一个迷你 Cordis 上。先看 MiniContext 的实现——它是全书的"压轴代码"，把第 5 章读过的 Cordis 内核压缩成不足百行。
 
 `src/context.ts`：
 
-``` ts
+```ts
 export type Disposable = () => void | Promise<void>
 type AnyFn = (...args: any[]) => any
 
@@ -528,7 +528,7 @@ export class MiniContext {
 对照 Cordis 内核逐一验证我们复刻了什么：
 
 | Cordis 概念 | MiniContext 对应 |
-|----|----|
+|---|---|
 | `ctx.effect(execute)` 返回 Disposable | `effect()`，disposer 登记进当前 Fiber 袋 |
 | Fiber 的 DisposableList，卸载时 LIFO | `fiberStack` + `bag`，`dispose()` 中 `reverse()` |
 | `ctx.on()` 注册即 effect | `on()` 内部自动 `track(dispose)` |
@@ -540,7 +540,7 @@ waterfall 的实现有个值得玩味的细节：监听器调 `next()` 时可以
 
 `src/plugins.ts`——先是审批插件（对应 dsh 的 `dsh-user-approval`，挂在 `tools/pre-execute`）：
 
-``` ts
+```ts
 import type { MiniContext } from './context.js'
 import type { Session } from './session.js'
 import type { ToolCall } from './session.js'
@@ -572,7 +572,7 @@ export function approvalPlugin(ctx: MiniContext): void {
 
 然后是全书的核心——**agent-loop 插件**。它消费 `session` / `llm` / `tools` 三个服务，向上下文提供 `runTurn` 能力：
 
-``` ts
+```ts
 /** Agent 主循环：它本身也只是一个插件。 */
 export function agentLoopPlugin(ctx: MiniContext): void {
   const runTurn = async (signal: AbortSignal): Promise<string> => {
@@ -657,7 +657,7 @@ export function agentLoopPlugin(ctx: MiniContext): void {
 这段循环精确对应 dsh `ReactLoopAgent` 的 turn/step 相位机（`agent.ts`）：
 
 - **Step = 一次模型请求 + 其工具调用；Turn = 0..n 个 Step**。`turn/start → step/start → assistant/message → (tool/call → tool/result)* → turn/end` 的事件序列与 dsh 的 durable 事件域一一对应。
-- **循环退出条件**是”模型不再发起工具调用”，而不是”模型说了完成”——这是 ReAct 式循环的机械本质。
+- **循环退出条件**是"模型不再发起工具调用"，而不是"模型说了完成"——这是 ReAct 式循环的机械本质。
 - **工具结果先落日志再进下一轮投影**，保证任何时刻崩溃都能从 JSONL 恢复出一致状态。
 - 真实 dsh 会把每个 chunk 也落日志（`assistant/chunk`）、用 `agent/pre-step` 挂压缩、用有界滚动池并行执行工具调用——这些都在扩展路线里（14.9 节），但脊柱已经完整。
 
@@ -665,7 +665,7 @@ export function agentLoopPlugin(ctx: MiniContext): void {
 
 审批服务 `approver` 的两种 provider，放在 `cli.ts` 中按 flag 选择（以下 `cli.ts` 各代码段顶部的一众 `import` 略去不表——均为本章前文写过的模块与 Node 内置库）：
 
-``` ts
+```ts
 import readline from 'node:readline/promises'
 
 /** 交互式审批：逐个询问 y/n。 */
@@ -691,7 +691,7 @@ const autoApprover: Approver = async () => true
 
 JSONL 持久化就是把 `onAppend` 接到文件追加写上。每行一个事件，天然 append-only、崩溃友好、可 `tail -f` 观察：
 
-``` ts
+```ts
 import { appendFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 
@@ -715,9 +715,9 @@ function openSessionLog(file: string, systemPrompt: string): Session {
 
 ## 14.8 全部组装成插件：loop 也是插件
 
-最后一块拼图是 `cli.ts` 的组装段——它回答了”为什么说 loop 也是插件”：
+最后一块拼图是 `cli.ts` 的组装段——它回答了"为什么说 loop 也是插件"：
 
-``` ts
+```ts
 // ---- 命令行参数 ----
 const argv = process.argv.slice(2)
 const useYes = argv.includes('--yes')
@@ -790,15 +790,15 @@ try {
 
 组装段的每一行都在复刻 dsh 的架构判断：
 
-1.  **无特权核心**：`cli.ts` 里没有任何一行”框架级”特权代码——session、llm、tools、审批、loop 全是 `ctx.plugin()` 加载的插件，彼此只通过 `ctx.get('服务名')` 发现。把 `agentLoopPlugin` 换成 Plan-and-Execute 循环、把 `OpenAICompatProvider` 换成 Anthropic 适配器，都是改一行配置的事。这就是 dsh 说的 “everything is a plugin” 的最小完整形态。
-2.  **注册即 effect**：`provide` / `register` / `on` 全部返回 disposer 并被 `plugin()` 归袋；进程退出前 `ctx.dispose()` 逆序回滚——在本程序里它主要是仪式感，但一旦加上 HTTP server、PTY、文件 watcher，这个机制就是性命攸关的。
-3.  **启动顺序即依赖图**：这里我们手工按依赖顺序 `plugin()`；真实 Cordis 用 `inject` 声明把这个顺序也消灭了（服务可用性驱动加载）。这是迷你版与完整框架最显著的差距，也是你升级时第一个该引入的特性。
+1. **无特权核心**：`cli.ts` 里没有任何一行"框架级"特权代码——session、llm、tools、审批、loop 全是 `ctx.plugin()` 加载的插件，彼此只通过 `ctx.get('服务名')` 发现。把 `agentLoopPlugin` 换成 Plan-and-Execute 循环、把 `OpenAICompatProvider` 换成 Anthropic 适配器，都是改一行配置的事。这就是 dsh 说的 "everything is a plugin" 的最小完整形态。
+2. **注册即 effect**：`provide` / `register` / `on` 全部返回 disposer 并被 `plugin()` 归袋；进程退出前 `ctx.dispose()` 逆序回滚——在本程序里它主要是仪式感，但一旦加上 HTTP server、PTY、文件 watcher，这个机制就是性命攸关的。
+3. **启动顺序即依赖图**：这里我们手工按依赖顺序 `plugin()`；真实 Cordis 用 `inject` 声明把这个顺序也消灭了（服务可用性驱动加载）。这是迷你版与完整框架最显著的差距，也是你升级时第一个该引入的特性。
 
 ## 14.9 运行演示与扩展路线
 
 ### 14.9.1 运行演示
 
-``` sh
+```sh
 export DEEPSEEK_API_KEY=sk-...
 # 一次性任务（headless 模式）
 pnpm start -- "列出当前目录的文件，然后在 NOTES.md 里写一份仓库摘要"
@@ -813,7 +813,7 @@ pnpm start -- --resume .mini-harness/sessions/1755000000000.jsonl "接着说"
 ### 14.9.2 扩展路线（对应 dsh 的子系统）
 
 | 下一步 | 挂在哪里 | 对应 dsh 子系统 |
-|----|----|----|
+|---|---|---|
 | **上下文压缩**：token 压力超阈值时把早期消息摘要为一条 user 消息 | loop 每 step 开头检查（dsh 挂在 serial `agent/pre-step`），用 surface 替换改写投影区间 | `compaction-basic`、`tool-result-pruner` |
 | **沙箱**：bash/edit 放进 bwrap/Landlock/Seatbelt 隔离执行 | 给工具 `execute` 加 `SandboxExecutionPolicy` 参数，审批通过后一次性提权 | `ctx.sandbox` seam、`sandbox-local` |
 | **子代理**：fork 会话日志，让子 agent 在副本上跑完再把结论回填 | `Session.fork()`（拷贝事件前缀派生分支），工具化包装为 `subagent` 工具 | `ctx.sessions.fork()`、`subagent/` |
@@ -829,19 +829,19 @@ pnpm start -- --resume .mini-harness/sessions/1755000000000.jsonl "接着说"
 - **Session 是唯一事实源**：append-only 事件日志 + `deriveMessages()` 投影，模型可见的一切都能从日志重建；JSONL 持久化只是 `onAppend` 钩子的一种实现。
 - **LLM 是 seam**：`LlmProvider` 接口 + OpenAI 兼容 SSE 适配器，字节流拼缓冲按行切 `data:` 帧，tool_calls 增量按 index 拼装。
 - **工具是 effect**：注册表白名单构造模型可见 schema；bash 非零退出不算错误，edit 要求字面量唯一匹配。
-- **主循环是相位机**：turn = 0..n step，step = 一次请求 + 其工具调用；退出条件是”无工具调用”；工具结果先落日志再进投影。
+- **主循环是相位机**：turn = 0..n step，step = 一次请求 + 其工具调用；退出条件是"无工具调用"；工具结果先落日志再进投影。
 - **审批是 waterfall**：监听器必须 `next()`，不调即短路；拒绝也走正常回填路径。
 - **loop 也是插件**：不足百行的 MiniContext 复刻了 Cordis 的 effect 追踪、waterfall、服务与插件机制；session/llm/tools/审批/loop 全部以插件身份组合，`dispose()` 逆序回滚一切。
 
 约 400 行代码，覆盖了 DeepSeek Harness 架构精要的每一条：事件溯源、能力 seam、turn/step 循环、waterfall 拦截、一切皆插件。剩下的是工程量——而你现在知道每一块该挂在哪里。
 
-本书的旅程到这里就结束了。从”Harness 为什么重要”出发，穿过 Cordis 的时空可组合性、dsh 的插件树与事件溯源日志，最终回到你亲手写下的这 400 行——它们不只是一个玩具，而是一套可生长的架构脊柱。愿你在自己的工程里，把它养成真正的 Harness。
+本书的旅程到这里就结束了。从"Harness 为什么重要"出发，穿过 Cordis 的时空可组合性、dsh 的插件树与事件溯源日志，最终回到你亲手写下的这 400 行——它们不只是一个玩具，而是一套可生长的架构脊柱。愿你在自己的工程里，把它养成真正的 Harness。
 
 ## 14.11 本章参考资料
 
 - [packages/core/agent-loop/src/agent.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/agent-loop/src/agent.ts) — 本章迷你 Harness 的 turn/step 循环与 inbox 唤醒语义的原型源码。
-- [docs/subsystems/session.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/session.md) — 支撑本章迷你版事件溯源日志与”模型历史由投影派生”的复刻目标。
+- [docs/subsystems/session.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/session.md) — 支撑本章迷你版事件溯源日志与"模型历史由投影派生"的复刻目标。
 - [docs/tool-execution-pipeline.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/tool-execution-pipeline.md) — 支撑本章迷你版工具管线与 waterfall 拦截点的简化复刻。
 - [Cordis 入门（dsh 官方文档）](https://deepseek-harness.github.io/deepseek-harness/reference/cordis-primer) — 本章复刻所用 Cordis 五要素（插件、上下文、inject、类型化事件、可逆 effect）的官方定义。
 - [Cordis 仓库](https://github.com/cordiverse/cordis) — 本章迷你 Harness 直接依赖的元框架源码（Context/Fiber/Events 原语）。
-- [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 本章结尾对照”架构精要”逐条验收复刻覆盖度的官方架构描述。
+- [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 本章结尾对照"架构精要"逐条验收复刻覆盖度的官方架构描述。

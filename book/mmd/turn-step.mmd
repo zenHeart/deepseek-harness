@@ -1,0 +1,23 @@
+%%{init: {'theme':'base','themeVariables':{'background':'#FBF8F3','primaryColor':'#F2EADF','primaryBorderColor':'#8A7B66','primaryTextColor':'#3B342B','lineColor':'#8A7B66','secondaryColor':'#D9E2E4','tertiaryColor':'#EAD9C8','fontFamily':'Noto Sans CJK SC'}}}%%
+sequenceDiagram
+    participant U as 用户/插件
+    participant L as AgentLoop
+    participant S as Session日志
+    participant M as 模型
+    participant T as 工具管线
+    U->>L: followup() / steer() / inject()
+    L->>S: append turn/start
+    loop 每个 step
+        L->>S: append step/start
+        L->>M: agent/request → llm/stream
+        M-->>L: assistant/chunk*
+        L->>S: 逐 chunk 落日志
+        alt 含工具调用
+            L->>T: tool/call（有界滚动池调度）
+            T-->>L: tool/result
+            L->>S: append tool/result
+        else 无工具调用
+            L->>S: append step/end
+        end
+    end
+    L->>S: append turn/end

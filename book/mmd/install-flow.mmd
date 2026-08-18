@@ -1,0 +1,6 @@
+%%{init: {'theme':'base','themeVariables':{'background':'#FBF8F3','primaryColor':'#F2EADF','primaryBorderColor':'#8A7B66','primaryTextColor':'#3B342B','lineColor':'#8A7B66','secondaryColor':'#D9E2E4','tertiaryColor':'#EAD9C8','fontFamily':'Noto Sans CJK SC'}}}%%
+flowchart LR
+    A["安装 Node 22.19+"] --> B["npx @deepseek-ai/dsh web<br/>或源码 pnpm build"]
+    B --> C["Web UI 配置模型<br/>Settings → Models"]
+    C --> D["选择工作区<br/>Choose workspace"]
+    D --> E["新建会话<br/>运行任务 + 审批"]

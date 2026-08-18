@@ -38,7 +38,7 @@ Cordis 不是为 dsh 而生的，它的血统要追溯到 2020 年 1 月 Shigma 
 
 这就是“时空可组合性”一词的原始出处。2026 年 8 月 13 日，三件事同日发生：cordiverse/paper 公开预印本《A Programming Paradigm for Spatiotemporal Composability》，把可逆 effects 与响应式 coeffects 形式化为运行时机制，且摘要直接把 “self-evolving agent harnesses” 写进动机句；Cordis 仓库 tagline 改为 “Meta-Framework of Spatiotemporal Composability”；dsh 开发者预览版开源，README 明言 “dsh is powered by Cordis, whose design is described in *A Programming Paradigm for Spatiotemporal Composability*”。论文、框架、产品同日闭环——理论化与工程化出自同一作者之手，这在本行业几乎没有先例。
 
-![可逆性与时空可组合性](../images/file17.png)
+![可逆性与时空可组合性](../images/fig-c2-spacetime.png)
 
 *图 15-1 从可逆性到时空可组合性*
 
@@ -54,7 +54,7 @@ dsh 架构文档给出的理由只有一句话，但分量极重：
 
 “没有可供打补丁的特权核心”——这句话的反面就是 Claude Code 式单体核心 + 外围 hooks 的结构。全部插件化换来三样东西：**可替换**（模型、循环都可从配置层换掉）、**可重组**（四种运行模式只是不同的插件集合）、以及**生态卡位**——发布文结尾写得很明白：“我们期待与全球开发者一起，在开源、开放、可复用、可组合的基础设施之上，共同探索智能上限。”（华尔街见闻全文转载，wallstreetcn.com/articles/3779385）如果 harness 成为行业统一脚手架，那么“一切皆插件”就是这个位置上最重要的准入承诺。发布文截图里“插件列表 **132**”且逐条可启停，证明这不是口号而是 UI 可数的运行事实。
 
-放弃的是什么？是单体架构的简单与性能余量：跨插件通信必须走服务与事件，边界处的显式性用 AGENTS.md 的条款强制维持（“Explicit \> implicit at package boundaries……never a hidden `?? default` inside `run()`”）。
+放弃的是什么？是单体架构的简单与性能余量：跨插件通信必须走服务与事件，边界处的显式性用 AGENTS.md 的条款强制维持（“Explicit > implicit at package boundaries……never a hidden `?? default` inside `run()`”）。
 
 ### 15.3.2 为什么 Cordis 元框架只做三件事
 
@@ -104,7 +104,7 @@ architecture.md：“A running `dsh` is a plugin tree composed at boot from orde
 
 AGENTS.md：“**Pre-release stance: foundation over blast radius**……prefer the correct foundation over compatibility shims.” 官方 README 与发布文同步压低预期：developer preview、“THERE WILL BE COMPATIBILITY-BREAKING CHANGES”。**换来的**：v0.1 不背历史包袱，错误的设计可以在用户基数还小时修正；**放弃的**：早期采用者的升级平顺性。配套条款 “Misconfiguration fails loud……never silently skip a missing referent” 是同一哲学：宁可响亮地坏，不可安静地错。
 
-![架构权衡的天平](../images/file18.png)
+![架构权衡的天平](../images/fig-c5-tradeoff.png)
 
 *图 15-2 每个设计决策都是一次权衡*
 
@@ -120,7 +120,7 @@ AGENTS.md：“**Pre-release stance: foundation over blast radius**……prefer 
 
 **创造模式**可以检查当前运行时、在内存中试验 Cordis 插件，并据此组合和创作新的模式。这是四种模式里最激进的一个：agent 在运行时给**自己**加载、卸载、修改插件——形象地说，是给高速行驶的汽车换发动机。为什么敢这么做？因为 15.2 节的可逆性兜底：每一次试验性注册都是可回卷的 effect，试错了就卸载，路径无关性保证“加载过又卸载”不留下幽灵状态。没有可逆性，运行时自省就是自杀按钮；有了可逆性，它变成安全的试验场。论文摘要把 “self-evolving agent harnesses” 写进动机句，落点就在这里。
 
-![一切皆插件的组合生态](../images/file19.png)
+![一切皆插件的组合生态](../images/fig-c4-plugin-garden.png)
 
 *图 15-3 插件即积木：可自由组合、替换与创作*
 
@@ -133,15 +133,15 @@ dsh 的设计气质与大多数 AI 产品不同，原因是人的背景。崔添
 把这句话拆开，dsh 几乎逐条对应：
 
 | dsh 设计 | 出处 | 量化对应物 |
-|----|----|----|
+|---|---|---|
 | Model-visible ⟺ logged，运行时不变量断言 | architecture.md §Session log | 全状态可审计、无隐性行为 |
 | append-only 事件溯源，fork/resume 派生自同一事件流 | session.md | 交易日志 / 行情回放 |
 | 审批 fail-closed，`unavailable` 不开闸 | approval.md | 风控默认拒绝 |
 | `approval/asked` + `approval/decided` 审计对，ApprovalRequestId 品牌配对 | approval.md | 审计对 / 对账 |
 | vendoring：auditable, patchable, pinned；18 条 divergence 全记录 | vendor/README.md | 供应链钉版 + 变更留痕 |
 | “Misconfiguration fails loud”“never silently skip a missing referent” | AGENTS.md | 配置即风险敞口，必须显式 |
-| “Explicit \> implicit at package boundaries”，拒绝隐藏的 `?? default` | AGENTS.md | 无隐性行为 |
-| Loader 事务化配置重 reconciliation，失败回滚（本地修改 \#8） | vendor/README.md | 执行失败需要回退 |
+| “Explicit > implicit at package boundaries”，拒绝隐藏的 `?? default` | AGENTS.md | 无隐性行为 |
+| Loader 事务化配置重 reconciliation，失败回滚（本地修改 #8） | vendor/README.md | 执行失败需要回退 |
 | 极简模式 = 官方基准可复现底座 | 发布文 / V4-Flash 文档 | 回测环境与现实对齐 |
 
 媒体侧的总结可以作注脚：“高频量化交易系统的核心壁垒从来不是策略创新，而是极端复杂环境下的稳定执行、异常兜底、全程日志追溯与风险精准可控”（clawpk）；“在量化里，不能被稳定执行的策略价值就是 0。在 AI 里，不能安全操作文件、命令、代码的模型，也只是一个聊天框罢了。”（36 氪）读到这里再回头看 15.4 节那些看似“过度工程”的不变量，会发现它们不是学院派的洁癖，而是另一个行业用真金白银买来的纪律的平移。
@@ -172,11 +172,11 @@ dsh 的设计气质与大多数 AI 产品不同，原因是人的背景。崔添
 
 ## 15.9 本章参考资料
 
-- [《可逆的插件系统》（Koishi 官方 cookbook）](https://koishi.chat/zh-CN/cookbook/design/disposable.html) — 本章最重要的一手文献：Shigma 自述 Cordis 元框架定位、可逆性动机与”时空可组合性”一词的原始出处。
-- [Cordis 论文仓库（preprint）](https://github.com/cordiverse/paper) — 支撑本章 effect/coeffect 形式化与”理论—框架—产品”闭环的叙事主线。
-- [DeepSeek Harness 官方发布文（微信公众号）](https://mp.weixin.qq.com/s/mANdGRI4fO_sEbC1ECEoZQ) — 支撑本章”一切皆插件”总纲、四种运行模式与 132 插件截图的权衡背景。
+- [《可逆的插件系统》（Koishi 官方 cookbook）](https://koishi.chat/zh-CN/cookbook/design/disposable.html) — 本章最重要的一手文献：Shigma 自述 Cordis 元框架定位、可逆性动机与"时空可组合性"一词的原始出处。
+- [Cordis 论文仓库（preprint）](https://github.com/cordiverse/paper) — 支撑本章 effect/coeffect 形式化与"理论—框架—产品"闭环的叙事主线。
+- [DeepSeek Harness 官方发布文（微信公众号）](https://mp.weixin.qq.com/s/mANdGRI4fO_sEbC1ECEoZQ) — 支撑本章"一切皆插件"总纲、四种运行模式与 132 插件截图的权衡背景。
 - [Jiayuan Zhang 推文](https://x.com/jiayuan_jy/status/2087911060154314963) — 乐高汽车隐喻、自进化软件雏形与函数式风格的解读，支撑本章对 dsh 设计哲学的讨论。
 - [七牛云新闻：量化思维与 Harness 工程同构](https://news.qiniu.com/archives/1786527719433) — 支撑本章 Jane Street 经验迁移（可审计、可回退、无隐性行为）的方法论论述。
-- [DoNews 报道](https://www.donews.com/news/detail/1/6670452.html) — 支撑本章 dsh 与 Claude Code / Codex 路线差异（“不只是 DeepSeek 版 Claude Code”）的取舍讨论。
+- [DoNews 报道](https://www.donews.com/news/detail/1/6670452.html) — 支撑本章 dsh 与 Claude Code / Codex 路线差异（"不只是 DeepSeek 版 Claude Code"）的取舍讨论。
 - [Agent Harness 对比卷（harness-books）](https://harness-books.agentway.dev/book2-comparing/exported/book2-comparing.pdf) — 支撑本章三条路线结构性差异（hooks 单体 / Rust 单体 / 运行时插件系统）的社区一手分析。
-- [chooseai 分析](https://www.chooseai.net/news/3901/) — 支撑本章”未决问题”小节中量化经验迁移风险与工程文化复制难度的质疑面材料。
+- [chooseai 分析](https://www.chooseai.net/news/3901/) — 支撑本章"未决问题"小节中量化经验迁移风险与工程文化复制难度的质疑面材料。

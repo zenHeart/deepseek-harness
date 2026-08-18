@@ -1,0 +1,13 @@
+%%{init: {'theme':'base','themeVariables':{'background':'#FBF8F3','primaryColor':'#F2EADF','primaryBorderColor':'#8A7B66','primaryTextColor':'#3B342B','lineColor':'#8A7B66','secondaryColor':'#D9E2E4','tertiaryColor':'#EAD9C8','fontFamily':'Noto Sans CJK SC'}}}%%
+flowchart TD
+    A["① tool/call 先落日志"] --> B["② tools/pre-execute waterfall<br/>hooks / 权限 / 沙箱"]
+    B --> C["③ 单调 guards（deny-or-abstain）"]
+    C --> D{"④ 需要审批？"}
+    D -- ask --> E["ctx.approval 一次性询问<br/>fail-closed：unavailable = 拒绝"]
+    D -- 放行 --> F["⑤ tools/execute around-waterfall<br/>超时 / 重试 / 指标包装"]
+    E --> F
+    F --> G["⑥ 工具体执行<br/>fs 变更再过 fs/write-intent 与 edit-intent 事件门"]
+    G --> H["⑦ tools/post-execute waterfall<br/>accept / block / replace / 追加 context"]
+    H --> I["⑧ finalizeContent 内容不变量"]
+    I --> J["⑨ tools/result 同步通知"]
+    J --> K["⑩ tool/result 落日志"]

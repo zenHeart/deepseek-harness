@@ -1,0 +1,8 @@
+%%{init: {'theme':'base','themeVariables':{'background':'#FBF8F3','primaryColor':'#F2EADF','primaryBorderColor':'#8A7B66','primaryTextColor':'#3B342B','lineColor':'#8A7B66','secondaryColor':'#D9E2E4','tertiaryColor':'#EAD9C8','fontFamily':'Noto Sans CJK SC'}}}%%
+flowchart TB
+    CLI["CLI 入口（readline 交互 / auto 审批）"] --> CTX["MiniContext<br/>effect / waterfall / provide / plugin"]
+    CTX --> LOOP["AgentLoop 插件<br/>turn/step 相位机"]
+    CTX --> TOOLS["Tools 插件<br/>bash + edit"]
+    CTX --> LLM["LLM 适配器<br/>OpenAI 兼容 SSE"]
+    LOOP --> SES["Session：append-only 日志<br/>+ deriveMessages 投影 + JSONL 持久化"]
+    TOOLS --> SES

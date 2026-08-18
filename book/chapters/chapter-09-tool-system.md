@@ -6,18 +6,18 @@
 
 工具 = `ToolDefinition`（权威定义见 `packages/core/tools/src/index.ts` 与 `docs/subsystems/tools.md`）。一个完整的工具定义由六部分组成：
 
-1.  **模型可见的 `ToolSchema`**：`name` / `description` / `parameters`。关键约束是——注册表的 `schemas()` 方法用**显式白名单**构造模型可见 schema，宿主侧字段（沙箱策略、内部标记等）**绝不泄漏**进模型请求。这是“白名单而非黑名单”的安全姿态。
-2.  **强制的 canonical 输出声明 `output: { schema, render, presentationMeta? }`**：dsh 不允许工具“随便返回点什么”。`output.schema` 是输出值的运行时契约；`render(args, value)` 把结构化输出渲染成模型可读的 content block；`presentationMeta` 则给 UI 递送结构化呈现素材（如 diff 数据）。模型、日志、UI 三者消费的是同一个值的不同投影。
-3.  **`execute(args, exec)`**：工具体，真正的副作用发生地。
-4.  **可选 `finalizeContent`**：最后一道同步的内容不变量——无论结果经历了多少层 waterfall 改写，落日志前都要过它，保证“模型可见 ⟺ logged”的内容层面收口。
-5.  **`timeoutMs` 与 `isConcurrencySafe`**：前者供 `tools/execute` around-waterfall 包超时；后者是并行分类器，第 8 章调度器据此把调用分为 parallel / exclusive。
-6.  **UI 呈现器 `presentCall / presentResult`**：客户端约 40 个 React UI 插件用它们渲染工具调用的卡片（如 edit 的 diff 视图），工具作者对自己的调用如何“被看见”有一等控制权。
+1. **模型可见的 `ToolSchema`**：`name` / `description` / `parameters`。关键约束是——注册表的 `schemas()` 方法用**显式白名单**构造模型可见 schema，宿主侧字段（沙箱策略、内部标记等）**绝不泄漏**进模型请求。这是“白名单而非黑名单”的安全姿态。
+2. **强制的 canonical 输出声明 `output: { schema, render, presentationMeta? }`**：dsh 不允许工具“随便返回点什么”。`output.schema` 是输出值的运行时契约；`render(args, value)` 把结构化输出渲染成模型可读的 content block；`presentationMeta` 则给 UI 递送结构化呈现素材（如 diff 数据）。模型、日志、UI 三者消费的是同一个值的不同投影。
+3. **`execute(args, exec)`**：工具体，真正的副作用发生地。
+4. **可选 `finalizeContent`**：最后一道同步的内容不变量——无论结果经历了多少层 waterfall 改写，落日志前都要过它，保证“模型可见 ⟺ logged”的内容层面收口。
+5. **`timeoutMs` 与 `isConcurrencySafe`**：前者供 `tools/execute` around-waterfall 包超时；后者是并行分类器，第 8 章调度器据此把调用分为 parallel / exclusive。
+6. **UI 呈现器 `presentCall / presentResult`**：客户端约 40 个 React UI 插件用它们渲染工具调用的卡片（如 edit 的 diff 视图），工具作者对自己的调用如何“被看见”有一等控制权。
 
 ## 9.2 defineTool DSL 精读：edit 工具
 
 第一方工具用 `defineTool` DSL 编写。下面是真实代码（`packages/fs/tool-fs/src/edit.ts:83`，节选），这是“模型可见 schema + 沙箱策略 + 事件门”三位一体的教科书样本：
 
-``` ts
+```ts
 ctx.tools.register(defineTool({
   name: 'edit',
   description: 'Edit an existing UTF-8 text file by replacing literal text.',
@@ -59,19 +59,19 @@ ctx.tools.register(defineTool({
 
 `docs/tool-execution-pipeline.md` 定义了每一次工具调用的完整旅程，如图 9-1：
 
-![工具执行管线](../images/file11.png)
+![工具执行管线](../images/mm-tool-pipeline.png)
 
 *图 9-1 工具执行管线*
 
-1.  **`tool/call`**：执行前先把调用落日志（事实先于副作用）。
-2.  **`tools/pre-execute` waterfall**：hooks、权限、沙箱检查在此拦截；任一监听器可改写参数、直接 deny，或返回 `ask` 触发审批。
-3.  **单调 guards**：只能“deny 或弃权”，永不放行升级——guard 之间无否决竞争，语义单调。
-4.  **`ctx.approval` 一次性询问**：pre-execute 返回 `ask` 时弹出。`ApprovalOutcome` 封闭且 fail-closed：`'allowed-once' | 'rejected' | 'cancelled' | 'unavailable'`；应答者缺失或抛错一律归为 `unavailable` → 拒绝。每次询问记 `approval/asked` + `approval/decided` 审计对（log-only，不进模型 transcript）。会话级策略 `'never'` 在服务内部强制执行，连 prepend 的应答者也绕不过。
-5.  **`tools/execute` around-waterfall**：超时、重试、指标包装的真正执行体。
-6.  **工具体 `execute`**：其中 fs 变更再过 `fs/write-intent` / `fs/edit-intent` 事件门（见 9.2）。
-7.  **`tools/post-execute` waterfall**：结果可以 accept / block / replace，还能追加 context（经 FIFO 注入下一条 step 的收件箱）。注意：**denied 的调用也走 post**——否决本身也是一个可被观察、改写的“结果”。
-8.  **注册表外层归一化**：快照/渲染失败转为 `isError` 结果而非异常逃逸。
-9.  **`finalizeContent`**：最后一道同步内容不变量。
+1. **`tool/call`**：执行前先把调用落日志（事实先于副作用）。
+2. **`tools/pre-execute` waterfall**：hooks、权限、沙箱检查在此拦截；任一监听器可改写参数、直接 deny，或返回 `ask` 触发审批。
+3. **单调 guards**：只能“deny 或弃权”，永不放行升级——guard 之间无否决竞争，语义单调。
+4. **`ctx.approval` 一次性询问**：pre-execute 返回 `ask` 时弹出。`ApprovalOutcome` 封闭且 fail-closed：`'allowed-once' | 'rejected' | 'cancelled' | 'unavailable'`；应答者缺失或抛错一律归为 `unavailable` → 拒绝。每次询问记 `approval/asked` + `approval/decided` 审计对（log-only，不进模型 transcript）。会话级策略 `'never'` 在服务内部强制执行，连 prepend 的应答者也绕不过。
+5. **`tools/execute` around-waterfall**：超时、重试、指标包装的真正执行体。
+6. **工具体 `execute`**：其中 fs 变更再过 `fs/write-intent` / `fs/edit-intent` 事件门（见 9.2）。
+7. **`tools/post-execute` waterfall**：结果可以 accept / block / replace，还能追加 context（经 FIFO 注入下一条 step 的收件箱）。注意：**denied 的调用也走 post**——否决本身也是一个可被观察、改写的“结果”。
+8. **注册表外层归一化**：快照/渲染失败转为 `isError` 结果而非异常逃逸。
+9. **`finalizeContent`**：最后一道同步内容不变量。
 10. **`tools/result` 同步通知 → `tool/result` 落日志**：每个 `tool/call` 都有配对的 `tool/result`（包括 8.5 节说的合成 abort 结果），replay 永远合法。
 
 三层 waterfall（pre / execute / post）都可改写调用，这是插件介入工具系统的全部合法入口——再次呼应宪章“Plugins, not loop changes”。
@@ -87,7 +87,7 @@ ctx.tools.register(defineTool({
 dsh-base bundle 中的内置工具（均见第 7 章 bundle 清单与 `docs/tool-catalog.md`）：
 
 | 工具 | 包 | 说明 |
-|----|----|----|
+|---|---|---|
 | `bash` / `pwsh` | `tool-bash` / `tool-pwsh` | 平台互斥（`!!js process.platform === 'win32'` 切换） |
 | `edit` / `read` / `read_image` / `write` | `tool-fs` | 字面量替换编辑，fs seam 之上 |
 | `glob` / `grep` | `tool-fs-search` | 内置 ripgrep，无宿主依赖 |
@@ -111,7 +111,7 @@ dsh-base bundle 中的内置工具（均见第 7 章 bundle 清单与 `docs/tool
 工具系统脚下踩着一批精挑细选的第三方/自研组件：
 
 | 层 | 依赖/机制 | 角色 | 证据 |
-|----|----|----|----|
+|---|---|---|---|
 | 文件搜索 | `@vscode/ripgrep` 打包的 rg 二进制 | glob/grep 经 `ctx.subprocess` 前台调用，无宿主安装依赖、不过 shell 层 | `packages/fs/tool-fs-search/package.json`、`src/glob.ts`、`src/grep.ts` |
 | 终端 PTY | `node-pty` | 持久 PTY 会话 seam（`ctx.terminals`），支撑六个 `terminal_*` 工具 | `packages/terminal/*` |
 | 沙箱 | Linux bwrap / Landlock（自研 `native/landlock-run`，Rust 原生启动器，三平台 npm 包 optional dep 分发）、macOS Seatbelt、Windows ACL restricted-token | 功能探测、fail-closed；后端须上报 `SandboxEnforcement`（`'full'` 或 `'partial'`；旧 Landlock ABI、Windows ACL 为 partial，消费者必须区分） | `docs/subsystems/sandbox.md`、`native/README.md` |
@@ -140,4 +140,4 @@ dsh-base bundle 中的内置工具（均见第 7 章 bundle 清单与 `docs/tool
 - [docs/tool-execution-pipeline.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/tool-execution-pipeline.md) — 支撑本章 `tool/call` → 三层 waterfall → `finalizeContent` → `tool/result` 的完整执行管线顺序。
 - [packages/fs/tool-fs/src/edit.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/fs/tool-fs/src/edit.ts) — 支撑本章 `defineTool` DSL 与 edit 工具沙箱策略解析的真实代码示例。
 - [packages/core/tools/src/code-mode.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/tools/src/code-mode.ts) — 支撑本章 Code Mode（`run_code` 保留工具）子调用重入受守护管线的实现。
-- [Anthropic Engineering：Writing Effective Tools for Agents](https://www.anthropic.com/engineering) — 支撑本章”Agent 是确定性工具的非确定性用户”、工具描述即 prompt engineering 的工具设计原则。
+- [Anthropic Engineering：Writing Effective Tools for Agents](https://www.anthropic.com/engineering) — 支撑本章"Agent 是确定性工具的非确定性用户"、工具描述即 prompt engineering 的工具设计原则。
