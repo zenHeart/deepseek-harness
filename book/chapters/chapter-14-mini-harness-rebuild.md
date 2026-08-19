@@ -822,6 +822,8 @@ pnpm start -- --resume .mini-harness/sessions/1755000000000.jsonl "接着说"
 | **换成真 Cordis**：MiniContext 接口刻意对齐，迁移后获得 inject 反应式加载、HMR、loader YAML 树 | `context.ts` 整体替换 | `cordiverse/cordis` |
 | **更多 provider**：Anthropic、本地 vLLM、公司网关 | 再写一个 `LlmProvider` | `llm-pi-ai` 多 provider 适配器 |
 
+升级路线表之外，值得知道同行也在同一方向上移动：pi 在 v0.84.0（2026-08-06）做了一次破坏性升级——pi-agent-core 换成 v4 lane-based 的 Session/SessionStorage/SessionRepo API，同时移除了 legacy JSONL 与 in-memory repo，等于官方宣告"事件日志 + 存储 seam"成为会话层的标准形态；Claude Code 2.1.232（2026-08-13）则把 subagent forking 默认打开（`subagent_type: "fork"` 的子代理继承完整对话与缓存）——与本章 `Session.fork()` 一行之遥的设计，在工业级产品里已经是默认行为。你今天复刻的这 400 行，恰好踩在整个行业收敛的骨架上。
+
 ## 14.10 本章小结
 
 我们从空目录造出了一个可工作的 agent harness：
@@ -840,8 +842,10 @@ pnpm start -- --resume .mini-harness/sessions/1755000000000.jsonl "接着说"
 ## 14.11 本章参考资料
 
 - [packages/core/agent-loop/src/agent.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/agent-loop/src/agent.ts) — 本章迷你 Harness 的 turn/step 循环与 inbox 唤醒语义的原型源码。
-- [docs/subsystems/session.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/session.md) — 支撑本章迷你版事件溯源日志与"模型历史由投影派生"的复刻目标。
-- [docs/tool-execution-pipeline.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/tool-execution-pipeline.md) — 支撑本章迷你版工具管线与 waterfall 拦截点的简化复刻。
+- [docs/subsystems/session.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/session.md) — dsh 会话子系统设计文档：事件溯源日志的完整事件清单与"模型历史由投影派生"的语义，可用来对照检查你的迷你版复刻了哪些、省略了哪些。
+- [docs/tool-execution-pipeline.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/tool-execution-pipeline.md) — 工具执行管线文档：完整的 waterfall 拦截点清单，读完可以评估迷你版的管线简化掉了哪几层。
 - [Cordis 入门（dsh 官方文档）](https://deepseek-harness.github.io/deepseek-harness/reference/cordis-primer) — 本章复刻所用 Cordis 五要素（插件、上下文、inject、类型化事件、可逆 effect）的官方定义。
 - [Cordis 仓库](https://github.com/cordiverse/cordis) — 本章迷你 Harness 直接依赖的元框架源码（Context/Fiber/Events 原语）。
 - [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 本章结尾对照"架构精要"逐条验收复刻覆盖度的官方架构描述。
+- [pi 仓库](https://github.com/earendil-works/pi) — pi 的源码与 CHANGELOG：v0.84.0 换用 lane-based Session/SessionStorage/SessionRepo 并移除 legacy JSONL 的破坏性升级记录在此，是"会话层标准化"趋势的一手证据。
+- [Claude Code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) — Claude Code 官方更新日志：2.1.232 起 subagent forking 默认开启，可与本章 `Session.fork()` 的迷你实现对照阅读。

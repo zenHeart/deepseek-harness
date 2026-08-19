@@ -239,8 +239,9 @@ api 插件经历"自动卸载 → 新 database 上线 → 自动重启"的完整
 
 ## 4.9 本章参考资料
 
-- [Cordis 论文仓库（preprint）](https://github.com/cordiverse/paper) — 支撑本章 revertible effects / reactive coeffects 提升为运行时机制、统一为单一 Context 类型的理论框架。
-- [Cordis 入门（dsh 官方文档）](https://deepseek-harness.github.io/deepseek-harness/reference/cordis-primer) — 官方 primer 总结的五个核心概念，支撑本章论文概念与代码实体的对应表。
-- [Cordis 仓库](https://github.com/cordiverse/cordis) — 本章全部源码论断的上游仓库（`packages/core/src`，约 1848 行核心代码）。
-- [context.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/context.ts) — 支撑本章 Context 的 Proxy 化构造与根 Fiber 引导。
-- [fiber.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/fiber.ts) — 支撑本章 `ctx.effect()` 返回 disposer、FiberState 状态机等核心原理的代码依据。
+- [Cordis 论文仓库（preprint）](https://github.com/cordiverse/paper) — 论文草稿全文，revertible effects 与 reactive coeffects 如何被定义为运行时机制、并统一于单一 Context 类型，都以这里为准。
+- [Cordis 入门（dsh 官方文档）](https://deepseek-harness.github.io/deepseek-harness/reference/cordis-primer) — dsh 官方文档的 Cordis primer，用五个核心概念串起论文术语与代码实体的对应关系。
+- [Cordis 仓库](https://github.com/cordiverse/cordis) — Cordis 上游仓库，本章源码引用的出处（`packages/core/src`，约 1848 行核心代码）。
+- [context.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/context.ts) — Context 的实现源码，可对照阅读 Proxy 化构造与根 Fiber 引导的完整代码。
+- [fiber.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/fiber.ts) — Fiber 的实现源码，`ctx.effect()` 返回 disposer、FiberState 状态机等核心原理都在这里。
+- [AgentAtlas：Cordis 解读](https://agentatlas.org/blog/cordis-explained-how-deepseek-harness-plugin-framework-works/) — 2026-08-17 的第三方解读，从插件框架工作机制的角度讲解 Cordis 与 DeepSeek Harness 的关系。

@@ -82,6 +82,8 @@ ctx.tools.register(defineTool({
 
 有一个保留名：`run_code` **永不可注册**，因为它是 **Code Mode** 的传输层。Code Mode 下模型不再逐个发起 tool-call，而是写一段代码（TS/Python SDK，跑在 worker-thread 的 `code-runtime` seam 上），代码中对子工具的调用作为绑定**重新进入完整受守护工具管线**——审批、沙箱、guards 一层不少，子调用记录 `tool/code-dispatch` 事件。这等价于把“ReAct 循环的一步”编译成了一段可审计的程序。
 
+顺带说明命名：自 `rc.7`（2026-08-17）起，Web UI 中对应的 agent 预设更名为 **PTC 模式**（程序化工具调用），描述为“通过 Code Mode SDK 呈现工具，让模型用一个 TypeScript 程序组合多步操作”——改的是面向用户的预设名，底层机制仍叫 Code Mode，本书沿用机制名。
+
 ## 9.5 内置工具清单
 
 dsh-base bundle 中的内置工具（均见第 7 章 bundle 清单与 `docs/tool-catalog.md`）：
@@ -105,6 +107,8 @@ dsh-base bundle 中的内置工具（均见第 7 章 bundle 清单与 `docs/tool
 | `run_code` | `dsh-tools`（保留） | Code Mode 传输层，不可注册 |
 
 默认禁用的还有 `dsh-session-telemetry-otel`（OTLP 遥测，须 env 显式开启）与 `dsh-session-query-sqlite` 的自动打开（`openAt: never`）——一切有外部副作用或成本的能力默认关闭，是 dsh 的一致姿态。
+
+把这份清单与 Claude Code 的工具集对照，能看出两种有趣的演进方向。Claude Code 在 2.1.98 引入 Monitor 后台事件流工具、在 2.1.214 引入 EndConversation 让模型主动结束会话；而自 2.1.233（2026-08-14）起，Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5 等新模型默认不再提供 TodoWrite / Task 系列工具（设 `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` 可恢复）——其判断是新一代模型已能自我管理任务流程，流程工具反而成为上下文噪音。dsh 的取舍相反：`todo`、`goal`、`jobs` 等流程工具仍在默认人格中占有一席之地，且全部只是可替换插件。哪种判断更对尚无定论，但 dsh 的插件化姿态意味着你不必站队——不认同就 patch 掉。
 
 ## 9.6 底层工具链
 
@@ -135,9 +139,10 @@ dsh-base bundle 中的内置工具（均见第 7 章 bundle 清单与 `docs/tool
 
 ## 9.8 本章参考资料
 
-- [docs/subsystems/tools.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/tools.md) — 支撑本章 ToolDefinition 结构、强制 canonical 输出声明与模型可见 schema 白名单机制。
-- [packages/core/tools/src/index.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/tools/src/index.ts) — 支撑本章工具注册表、作用域注册与 `restrict()` 的源码依据。
-- [docs/tool-execution-pipeline.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/tool-execution-pipeline.md) — 支撑本章 `tool/call` → 三层 waterfall → `finalizeContent` → `tool/result` 的完整执行管线顺序。
-- [packages/fs/tool-fs/src/edit.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/fs/tool-fs/src/edit.ts) — 支撑本章 `defineTool` DSL 与 edit 工具沙箱策略解析的真实代码示例。
-- [packages/core/tools/src/code-mode.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/tools/src/code-mode.ts) — 支撑本章 Code Mode（`run_code` 保留工具）子调用重入受守护管线的实现。
-- [Anthropic Engineering：Writing Effective Tools for Agents](https://www.anthropic.com/engineering) — 支撑本章"Agent 是确定性工具的非确定性用户"、工具描述即 prompt engineering 的工具设计原则。
+- [docs/subsystems/tools.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/tools.md) — 工具子系统官方文档：ToolDefinition 六部分结构与模型可见 schema 白名单机制的权威说明，动手写工具前必读。
+- [packages/core/tools/src/index.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/tools/src/index.ts) — 工具注册表源码：`register()`、作用域注册、`restrict()` 与白名单 `schemas()` 的实现都在此，配 9.1 与 9.4 节读。
+- [docs/tool-execution-pipeline.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/tool-execution-pipeline.md) — 官方管线文档：一次工具调用从 `tool/call` 落日志到 `finalizeContent` 的完整十站旅程，与 9.3 节图文互为对照。
+- [packages/fs/tool-fs/src/edit.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/fs/tool-fs/src/edit.ts) — `edit` 工具的完整实现，是学习 `defineTool` DSL 写法（参数条件展开、output 契约、事件门）的最佳样本。
+- [packages/core/tools/src/code-mode.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/tools/src/code-mode.ts) — Code Mode（保留工具 `run_code`）的实现：子调用如何作为绑定重入受守护管线，9.4 节的代码出处。
+- [Anthropic Engineering：Writing Effective Tools for Agents](https://www.anthropic.com/engineering) — Anthropic 官方工程博客，其中 "Writing Effective Tools for Agents" 一篇系统阐述"工具描述即 prompt engineering"的原则，与本章的白名单 schema、canonical 输出设计互为印证。
+- [Claude Code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) — Claude Code 官方更新日志：新模型默认下线 TodoWrite/Task、Monitor、EndConversation 等工具演进均逐版本记录在案，是观察主流 harness 工具设计风向的窗口。

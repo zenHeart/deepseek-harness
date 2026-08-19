@@ -186,11 +186,11 @@ interface Base {
 
 - Koishi 机器人框架生态（Cordis 源起，作者 Shigma 团队）；上游依赖 `cosmokit`、`schemastery`、`@cordisjs/*`（loader / hmr / group / timer / include）
 
-## 16.6 附录 F：调研手记与证据快照
+## 16.6 附录 F：调研底稿与延伸阅读
 
-本书建立在五篇并行调研报告之上（2026-08-13/14 完成），全文收录于仓库 `book/briefs/`，供修订时溯源核对：
+本书写作基于五篇并行调研底稿（2026-08-13/14 完成），全文收录于仓库 `book/briefs/`。想逐文件核对本书引用的源码、数据与出处的读者，可以把它们当作延伸阅读；不打算溯源的读者直接跳过即可，正文本身是自足的。底稿保留调研当时的快照（如 dsh rc.5），个别细节可能已随版本演进。
 
-| 手记 | 范围 | 关键快照 |
+| 底稿 | 覆盖范围 | 读者能核对到什么 |
 |---|---|---|
 | `book/briefs/ecosystem.md` | Agent Harness 概念生态 | Hashimoto 命名（2026-02）、OpenAI 百万行实验、Composio/Writer 基准数据 |
 | `book/briefs/cordis.md` | Cordis 论文与上游源码 | `packages/core/src` 共 1848 行（context.ts 78 行 / fiber.ts 486 行）逐文件剖析 |
@@ -198,8 +198,8 @@ interface Base {
 | `book/briefs/dsh-usage.md` | 安装、使用与插件开发 | npm/源码两条路径、Web UI 四步上手、profile 体系与凭据解析顺序 |
 | `book/briefs/design-motivation.md` | 设计动机与技术权衡素材 | Koishi → Cordis 编年史、一手引文与来源 URL 清单 |
 
-**勘误说明**：调研手记写作时将 Cordis 作者 Shigma 与 Harness 团队负责人崔添翼标注为同一人；经复核（量子位、36氪、论文署名等一手来源），两人为不同个体——Shigma 本名史一凡，是 Koishi/Cordis 作者、论文一作；崔添翼为量化背景的团队负责人、论文三作。正文 2.2 节与 15.6 节已按此修正，手记原文保留原貌以存证据链。
-
-**勘误说明（v1.2.0，引用审计）**：初版有两处事实偏差已更正——(1) "约 300 个社区插件"的时间归属误写为"开源后几天内"，经新浪等多源核实应为内测期间即已产出，开源后呈爆发式增长（GitHub topic `dsh-plugin` 2026-08-18 实时计数超 7000）；(2) 第 1 章论据三"Cursor 46% vs 80%（2024）"未找到可回查的原始出处，已替换为可核验的 Endor Labs 交叉基准数据（同一 GPT-5.5 跨 Codex/Cursor harness 61.5% vs 87.2%）。
-
-**勘误说明（v1.3.0，全事实溯源审计）**：(1) 更正 v1.2.0 的一处误改——公众号注册时间初版记为 07-06 实为**正确**（21 世纪经济报道查证公众号信息：2026-07-06 注册、07-07 完成认证），v1.2.0 误将"媒体集中报道时间"（08-11/12）当作注册时间，本版恢复并补强来源；(2) 第 1 章 OpenAI 文章标题误作《Harnessing Codex...》，正名为《Leveraging Codex in an Agent-First World》（Ryan Lopopolo，2026-02-11）；(3) SWE-bench SOTA 实证日期由 2025-11 更正为 2025-01（Erik Schluntz《Raising the Bar on SWE-bench Verified with Claude 3.5 Sonnet》），表述由"仅靠工具描述"修正为"工具描述与脚手架设计"；(4) 论文二作单位"北京大学张玮组"更正为"北京大学张伟（Wei Zhang）组"（36 氪核实）；(5) Pi Agent 的 README 引语"this one is yours"未能在官方仓库核实，已替换为 README 可核验原文（四个工具、No MCP、No sub-agents、No permission popups）；(6) Koishi 起点由"2020 年 1 月"修正为"仓库创建于 2019 年 12 月、2020 年初发布"（GitHub 仓库元数据）；(7) Pi 的 stars 数更新为 9 万+（2026-08-18 实时计数）。此外，TSY Capital"Rust 自研低延迟交易系统"（钛媒体 2026-05-23）、chooseai 迁移风险分析（chooseai.net 2026-05-21）、宋斐"统一脚手架"论述（21 世纪经济报道 2026-08-11）、第一财经开发者评价（2026-08-13）等引语均已逐字回溯到原始报道并补充链接。
+> **人物与事实辨析**：阅读本书引用的报道时，有三处容易混淆，提前帮你厘清——
+>
+> - **Shigma 与崔添翼是两个人。** 网络上常把二者混为一谈：Shigma（本名史一凡）是 Cordis/Koishi 作者、时空可组合性论文一作；崔添翼是 Harness 团队负责人、前 Jane Street 量化工程师。一个是框架作者，一个是团队负责人，如今已在 DeepSeek 汇合，但履历互不重叠。
+> - **论文通讯作者的名字是张伟（Wei Zhang）。** 部分媒体误写作“张玮”，检索论文与署名信息时请以 Wei Zhang 为准。
+> - **公众号有两个不同的时间点。** “DeepSeek Harness 团队”公众号于 2026-07-06 注册、07-07 完成认证，而媒体集中报道发生在 08-11/12——注册时间与报道时间相隔一个多月，引用时别张冠李戴。

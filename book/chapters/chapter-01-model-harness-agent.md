@@ -119,7 +119,7 @@ Anthropic 给出的解决方案是**双 Agent 结构**：
 
 **论据一：TerminalBench 2.0 的排名跃迁。** LangChain 在 TerminalBench 2.0 上**仅改变 Harness、模型（gpt-5.2-codex）保持不变**，得分从 52.8 提升到 66.5（+13.7 个百分点），排名从 30 名开外跃升到**第 5 名**（LangChain 官方博客，2026-04）。同一份模型权重，换一个壳，就是从"不入流"到"第一梯队"的距离。
 
-**论据二：文件编辑接口的 61.6 个百分点。** 安全研究员 Can Boluk 的实验：在编码基准测试中**仅更换文件编辑接口的调用方式**（其余全部不变），Grok Code Fast 1 的分数从 **6.7% 跳到 68.3%**（2026，转引见本章参考资料）。接口设计——一个纯 Harness 层的决策——决定了这个系统究竟是"不可用"还是"可生产"。
+**论据二：文件编辑接口的 61.6 个百分点。** 安全研究员 Can Boluk 的实验：在编码基准测试中**仅更换文件编辑接口的调用方式**（其余全部不变），Grok Code Fast 1 的分数从 **6.7% 跳到 68.3%**（2026，详见本章参考资料）。接口设计——一个纯 Harness 层的决策——决定了这个系统究竟是"不可用"还是"可生产"。
 
 **论据三：同一模型，换个 harness 从 61.5% 到 87.2%。** Endor Labs 的交叉基准（2026-05）：同一个 GPT-5.5 模型、同一周，跑在原生 Codex harness 中功能正确率 **61.5%**，换到 Cursor 的 harness 中达到 **87.2%**——25.7 个百分点的差距，全部来自模型外面的那层代码。同一测试中，Opus 4.7 在 Cursor harness（91.1%）下的得分甚至高于 Anthropic 自家 Claude Code harness（87.2%）。
 
@@ -209,18 +209,18 @@ Aider 的答案是**以版本控制为中心**：每次修改自动 commit、用
 
 ## 1.8 本章参考资料
 
-- [Harness Engineering: Leveraging Codex in an Agent-First World（Ryan Lopopolo，OpenAI，2026-02-11）](https://openai.com/index/harness-engineering/) — 支撑本章 "Humans steer. Agents execute." 与"Agent 看不到的东西等于不存在"等 OpenAI 工程实践论点。
-- [Anthropic Engineering：Effective Harnesses for Long-Running Agents（2025-11）](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) — 支撑本章 Anthropic 对长任务 Agent 失控根源（上下文一致性下降、上下文焦虑）的系统性论述。
-- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — README 中 "everything is a plugin" 的定位，是本书贯穿的 Agent Harness 工程实例。
-- [Cordis 论文仓库](https://github.com/cordiverse/paper) — 《A Programming Paradigm for Spatiotemporal Composability》摘要把 "self-evolving agent harnesses" 写入动机句，支撑本章 Harness 成为竞争焦点的判断。
-- [Agent Harness 对比卷（harness-books）](https://harness-books.agentway.dev/book2-comparing/exported/book2-comparing.pdf) — 支撑本章 Claude Code / Codex 等同类 harness 设计理念谱系的社区一手分析（社区分析，非官方）。
-- [LangChain：The Anatomy of an Agent Harness（2026-03）](https://blog.langchain.com/the-anatomy-of-an-agent-harness/) — "Agent = Model + Harness" 公式化定义的出处，支撑 1.1 节的概念界定。
-- [LangChain：Improving Deep Agents with Harness Engineering（2026-04）](https://blog.langchain.com/improving-deep-agents-with-harness-engineering/) — 支撑论据一：仅改 harness、模型 gpt-5.2-codex 不变，Terminal Bench 2.0 得分 52.8→66.5（+13.7），排名 Top 30→Top 5。
-- [虎嗅：提示词工程、上下文工程都过时了，现在是 Harness Engineering 的时代（2026-03-13）](https://www.huxiu.com/article/4841931.html) — 支撑论据二（Can Boluk 编辑格式实验，Grok Code Fast 1 得分 6.7%→68.3%）与 Mitchell Hashimoto 2026-02-05 命名 Harness Engineering 的行业时间线。
-- [MindStudio：Cursor SDK vs Claude Code Harness 对比（2026-05）](https://www.mindstudio.ai/blog/cursor-sdk-vs-claude-code-harness-comparison) — 转引 Endor Labs 交叉基准，支撑论据三：同一 GPT-5.5 在 Codex vs Cursor harness 下 61.5% vs 87.2%；Opus 4.7 在 Claude Code vs Cursor harness 下 87.2% vs 91.1%。
-- [Composio：Finding the Best Harness（2026-08-11）](https://composio.dev/content/best-ai-agent-harnesses) — 支撑论据四：DeepSeek V4-Flash 在 8 个 harness 下的 240 次运行横评（总通过率 53.8%、单次成功成本 $0.028 vs $0.195）及姊妹篇 Kimi K3 版 68%→88%。
-- [Databricks 官方博客：Benchmarking Coding Agents on Databricks' Multi-Million Line Codebase（2026-07-08）](https://www.databricks.com/blog/benchmarking-coding-agents-databricks-multi-million-line-codebase) — 支撑论据五：同一模型经不同 harness（Claude Code/Codex vs Pi）任务成本相差 2 倍以上而质量持平，Pi 每轮上下文少约 3 倍。
-- [华尔街见闻：Opus 4.6 连续降智翻车一个月，Anthropic 终于公开认错（2026-04-24）](https://wallstreetcn.com/articles/3770813) — 详述 Anthropic 官方事故复盘《An update on recent Claude Code quality reports》（2026-04-23），支撑论据六：reasoning effort 降级、clear_thinking 缓存 bug、system prompt 限长指令三处 harness 层改动叠加导致"变笨"。
-- [Erik Schluntz：Raising the Bar on SWE-bench Verified with Claude 3.5 Sonnet（Anthropic，2025-01）](https://www.anthropic.com/research/swe-bench-sonnet) — 支撑 1.3.2 节"工具描述与脚手架设计刷新 SWE-bench Verified SOTA"的一手实证。
-- [Prithvi Rajasekaran：Harness Design for Long-Running Application Development（Anthropic，2026-03-24）](https://www.anthropic.com/engineering/harness-design-long-running-apps) — 支撑 1.3 节 Anthropic 理论奠基脉络（生成器-评估器三智能体架构、上下文焦虑的结构性解法）。
-- [Pi Agent 仓库 README（badlogic/pi-mono，Mario Zechner）](https://github.com/badlogic/pi-mono) — 支撑 1.5.3 节 Pi 极简设计的一手引语："four tools: read, write, edit, bash"、"No MCP"、"No sub-agents"、"No permission popups"。
+- [Harness Engineering: Leveraging Codex in an Agent-First World（Ryan Lopopolo，OpenAI，2026-02-11）](https://openai.com/index/harness-engineering/) — OpenAI 官方工程博客：5 个月、约 100 万行代码、零人工编写的内部实验全记录，含 "Humans steer. Agents execute."、"Agent 看不到的东西等于不存在" 与渐进式披露等原则的原始阐述。
+- [Anthropic Engineering：Effective Harnesses for Long-Running Agents（2025-11）](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) — Anthropic 工程博客：长任务 Agent 的"换班工程师"问题、Initializer/Coding 双 Agent 结构，以及上下文一致性下降、上下文焦虑两大失控根源的系统论述。
+- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — 本书剖析对象的官方仓库，README 中有 "everything is a plugin" 的定位、四种运行模式与快速上手命令。
+- [Cordis 论文仓库](https://github.com/cordiverse/paper) — 《A Programming Paradigm for Spatiotemporal Composability》论文与配套代码，摘要中把 "self-evolving agent harnesses" 列为研究动机。
+- [Agent Harness 对比卷（harness-books）](https://harness-books.agentway.dev/book2-comparing/exported/book2-comparing.pdf) — 社区编写的 Agent Harness 横向对比电子书（非官方），逐条拆解 Claude Code、Codex 等产品的设计理念与实现差异。
+- [LangChain：The Anatomy of an Agent Harness（2026-03）](https://blog.langchain.com/the-anatomy-of-an-agent-harness/) — LangChain 官方博客，提出 "Agent = Model + Harness" 的公式化定义，并逐层解剖 Harness 的组成部分。
+- [LangChain：Improving Deep Agents with Harness Engineering（2026-04）](https://blog.langchain.com/improving-deep-agents-with-harness-engineering/) — LangChain 官方博客：只改 harness、模型 gpt-5.2-codex 不变的 TerminalBench 2.0 实验全记录，得分 52.8→66.5（+13.7），排名从 30 名开外升至第 5。
+- [虎嗅：提示词工程、上下文工程都过时了，现在是 Harness Engineering 的时代（2026-03-13）](https://www.huxiu.com/article/4841931.html) — 中文行业综述：梳理 Mitchell Hashimoto 2026 年 2 月命名 Harness Engineering 的时间线，并报道 Can Boluk 的文件编辑接口实验（Grok Code Fast 1 得分 6.7%→68.3%）。
+- [MindStudio：Cursor SDK vs Claude Code Harness 对比（2026-05）](https://www.mindstudio.ai/blog/cursor-sdk-vs-claude-code-harness-comparison) — 第三方对比文章，引用 Endor Labs 交叉基准数据：同一 GPT-5.5 在 Codex 与 Cursor harness 下 61.5% vs 87.2%，Opus 4.7 在 Claude Code 与 Cursor harness 下 87.2% vs 91.1%。
+- [Composio：Finding the Best Harness（2026-08-11）](https://composio.dev/content/best-ai-agent-harnesses) — Composio 基准报告：同一 DeepSeek V4-Flash 模型在 8 个 harness 下 30 个工作流、共 240 次运行的横评数据（总通过率 53.8%，单次成功成本 $0.028–$0.195），另有 Kimi K3 模型的姊妹篇（68%→88%）。
+- [Databricks 官方博客：Benchmarking Coding Agents on Databricks' Multi-Million Line Codebase（2026-07-08）](https://www.databricks.com/blog/benchmarking-coding-agents-databricks-multi-million-line-codebase) — Databricks 在数百万行自有代码库上基准测试多个 coding agent 的实测报告，含不同 harness 下任务成本相差 2 倍以上、高效 harness 每轮上下文少约 3 倍的数据。
+- [华尔街见闻：Opus 4.6 连续降智翻车一个月，Anthropic 终于公开认错（2026-04-24）](https://wallstreetcn.com/articles/3770813) — 中文报道：详述 Anthropic 官方事故复盘《An update on recent Claude Code quality reports》（2026-04-23），含 reasoning effort 降级、clear_thinking 缓存 bug、system prompt 限长指令三处 harness 层改动的来龙去脉。
+- [Erik Schluntz：Raising the Bar on SWE-bench Verified with Claude 3.5 Sonnet（Anthropic，2025-01）](https://www.anthropic.com/research/swe-bench-sonnet) — Anthropic 研究博客：仅靠工具描述与脚手架设计、不改模型权重，把 SWE-bench Verified 刷到当时 SOTA 的实验记录。
+- [Prithvi Rajasekaran：Harness Design for Long-Running Application Development（Anthropic，2026-03-24）](https://www.anthropic.com/engineering/harness-design-long-running-apps) — Anthropic 工程博客：面向长任务应用开发的 Harness 设计方法论，含生成器-评估器多智能体架构与上下文焦虑的结构性解法。
+- [Pi Agent 仓库 README（badlogic/pi-mono，Mario Zechner）](https://github.com/badlogic/pi-mono) — Pi Agent 官方 README："四个工具 read/write/edit/bash"、"No MCP"、"No sub-agents"、"No permission popups" 极简宣言的原文与扩展机制说明。

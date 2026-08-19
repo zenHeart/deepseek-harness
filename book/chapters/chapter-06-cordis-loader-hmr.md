@@ -172,9 +172,9 @@ VS Code Extensions、Inversify、Spring 各自满足其中零到两条，Cordis 
 
 ## 6.9 本章参考资料
 
-- [@cordisjs/plugin-loader（Cordis 源码）](https://github.com/cordiverse/cordis/tree/master/packages/loader) — 支撑本章 Entry/EntryGroup/EntryTree 配置即组件树与 `internal/update` 配置回写机制。
-- [@cordisjs/plugin-hmr（Cordis 源码）](https://github.com/cordiverse/cordis/tree/master/packages/hmr) — 支撑本章基于 chokidar 的热模块替换与 `hmr/reload` 事件。
-- [《可逆的插件系统》（Koishi 官方 cookbook）](https://koishi.chat/zh-CN/cookbook/design/disposable.html) — 支撑本章"路径无关"的可逆性定义与热重载工程红利。
-- [Koishi 4.7.1 release notes](https://github.com/koishijs/koishi/discussions/691) — 支撑本章 Cordis 从 Koishi 核心抽象为独立包的时间线与官方首次表述。
-- [Koishi 4.17.2 release notes](https://github.com/koishijs/koishi/discussions/1378) — 支撑本章 `ctx.set()` 资源安全演进的史实。
-- [Cordis 仓库](https://github.com/cordiverse/cordis) — 本章与 VS Code Extensions / Inversify / Spring 对比表的源码依据。
+- [@cordisjs/plugin-loader（Cordis 源码）](https://github.com/cordiverse/cordis/tree/master/packages/loader) — loader 包源码：Entry/EntryGroup/EntryTree 配置树与 `internal/update` 配置回写机制的实现。
+- [@cordisjs/plugin-hmr（Cordis 源码）](https://github.com/cordiverse/cordis/tree/master/packages/hmr) — hmr 包源码：基于 chokidar 的热模块替换与 `hmr/reload` 事件的实现。
+- [《可逆的插件系统》（Koishi 官方 cookbook）](https://koishi.chat/zh-CN/cookbook/design/disposable.html) — Cordis 作者 Shigma 的设计长文，给出"路径无关"的可逆性定义，并讨论热重载等工程红利。
+- [Koishi 4.7.1 release notes](https://github.com/koishijs/koishi/discussions/691) — Cordis 从 Koishi 核心抽象为独立包时的官方发布说明，含时间线与首次表述。
+- [Koishi 4.17.2 release notes](https://github.com/koishijs/koishi/discussions/1378) — `ctx.set()` 资源安全演进相关的发布说明，记录了这段 API 变迁的来龙去脉。
+- [Cordis 仓库](https://github.com/cordiverse/cordis) — Cordis 上游仓库，本章与 VS Code Extensions / Inversify / Spring 对比时引用的源码都在这里。

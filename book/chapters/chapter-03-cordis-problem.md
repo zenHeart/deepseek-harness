@@ -65,7 +65,7 @@ DeepSeek Harness 的设计哲学是"**一切皆插件**"（everything is a plugi
 
 ## 3.3 论文的问题陈述
 
-Cordis 背后有一篇论文：《A Programming Paradigm for Spatiotemporal Composability》（托管于 github.com/cordiverse/paper，截至本书写作时仍是草稿，未上 arXiv）。其摘要开宗明义：
+Cordis 并非凭空出现：它由 Shigma 自 2019 年起在 Koishi 生态中孕育和维护，如今归属 cordiverse 组织独立发展。其理论表述集中在一篇论文中：《A Programming Paradigm for Spatiotemporal Composability》（由北京大学与 DeepSeek 的三位作者联合署名，托管于 github.com/cordiverse/paper，截至本书写作时仍是草稿，未上 arXiv）。其摘要开宗明义：
 
 > Modern software—from plugin systems to self-evolving agent harnesses—increasingly requires *dynamic composition*, yet its formal foundations remain underdeveloped.
 
@@ -143,7 +143,8 @@ Cordis 背后有一篇论文：《A Programming Paradigm for Spatiotemporal Comp
 
 ## 3.8 本章参考资料
 
-- [Cordis 论文仓库（preprint）](https://github.com/cordiverse/paper) — 论文摘要一手来源，支撑本章动态组合的时间/空间两个正交维度的形式化分解。
-- [《可逆的插件系统》（Koishi 官方 cookbook）](https://koishi.chat/zh-CN/cookbook/design/disposable.html) — Shigma 的设计长文，支撑本章"软件文明在退步"动机与可逆性三大好处（可组合性、可靠性、可访问性）。
-- [Cordis 仓库](https://github.com/cordiverse/cordis) — "Meta-Framework of Spatiotemporal Composability"，支撑本章 Cordis 作为问题答案的定位。
-- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — "一切皆插件"与创造模式运行时挂载自写插件的需求来源，支撑本章 Agent Harness 为何把动态组合变为基本运行方式。
+- [Cordis 论文仓库（preprint）](https://github.com/cordiverse/paper) — Cordis 配套论文的草稿全文，给出动态组合在时间/空间两个正交维度上的形式化定义。
+- [《可逆的插件系统》（Koishi 官方 cookbook）](https://koishi.chat/zh-CN/cookbook/design/disposable.html) — Cordis 作者 Shigma 的设计长文，讲清"软件文明在退步"的动机，以及可逆性带来的三大好处：可组合性、可靠性、可访问性。
+- [Cordis 仓库](https://github.com/cordiverse/cordis) — Cordis 源代码与 README，项目自述为 "Meta-Framework of Spatiotemporal Composability"。
+- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — DeepSeek Harness 源代码与 README，可以看到"一切皆插件"架构与创造模式的原始表述。
+- [The New Stack：DeepSeek Harness 开源报道](https://thenewstack.io/deepseek-harness-open-source-plugins/) — 2026-08-13 的第三方报道，从行业视角介绍 dsh 开源及其插件架构。

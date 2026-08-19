@@ -315,13 +315,15 @@ dsh plugin --profile <name> add <spec>     # 也支持 remove / why / update 等
 
 ### 13.8.2 发布与生态现状
 
-发布插件的流程：正常发布 npm 包（或直接用 GitHub 仓库分发），给仓库加上 GitHub topic **`dsh-plugin`** 即可被社区发现。截至 2026 年 8 月 18 日，该 topic 下已有 **7000+ 个公开仓库**（GitHub Topics 实时计数；据新浪等媒体报道，内测期间社区已产出约 300 个插件，开源后呈爆发式增长），生态包括：
+发布插件的流程：正常发布 npm 包（或直接用 GitHub 仓库分发），给仓库加上 GitHub topic **`dsh-plugin`** 即可被社区发现。截至 2026 年 8 月 18 日，该 topic 下已有 **7000+ 个公开仓库**（GitHub Topics 截至 2026-08-18 的计数；据新浪等媒体报道，内测期间社区已产出约 300 个插件，开源后呈爆发式增长），生态包括：
 
 - TUI 界面（`dsh-tianshu-tui`——官方无自带 TUI，终端界面靠社区）；
 - Web UI 皮肤与面板；
 - 视觉 / OCR 工具插件；
 - agent 搜索、`@file` 提及、VS Code 集成；
 - "Awesome DSH Plugins" 目录——它附带**每日兼容性追踪**，侧面印证 Developer Preview 阶段 breaking change 的频繁程度。
+
+生态的扩展面还在变宽。横向看，pi 从 v0.81.0（2026-07-21）起允许扩展注册完整的 provider——不只是挂工具，而是把一整层能力 seam 交给第三方实现；dsh 自己从 rc.7（2026-08-17）起也让插件可以注册设置卡片，把配置 UI 变成了扩展点。对插件作者的含义很直接：扩展点的边界每个版本都在外扩，动手写插件之前先翻一遍最新 changelog 里新增的注册 API，经常能省掉一层 workaround。
 
 这也意味着发布插件时的现实建议：README 中注明测试通过的 dsh 版本，关注 awesome 目录的兼容性追踪，必要时为不同版本提供分支。
 
@@ -360,9 +362,11 @@ dsh plugin --profile <name> add <spec>     # 也支持 remove / why / update 等
 
 ## 13.11 本章参考资料
 
-- [docs/user/develop/basic/index.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/user/develop/basic/index.md) — 支撑本章插件三形态（函数式/对象式/类式）、`inject` 声明与注册自动清理的最小教程。
-- [docs/user/develop/basic/tool.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/user/develop/basic/tool.md) — 支撑本章用 `defineTool` 编写工具插件的完整示例与验证流程。
-- [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 支撑本章"新功能挂哪里"扩展点对照表与 profile/bundle 层叠顺序。
-- [docs/development.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/development.md) — 支撑本章 Host/Client 双聚合构建、typecheck/check:all 等日常开发命令。
-- [GitHub topic: dsh-plugin](https://github.com/topics/dsh-plugin) — 支撑本章插件发现机制与社区插件生态（TUI、VS Code 集成、Awesome DSH Plugins 等；截至 2026-08-18 该 topic 下已超 7000 个公开仓库）。
-- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — 支撑本章 `dsh plugin add` 安装第三方插件与 pnpm allowBuilds 拦截的预期行为。
+- [docs/user/develop/basic/index.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/user/develop/basic/index.md) — 官方插件开发入门：插件三形态（函数式/对象式/类式）、`inject` 声明与注册自动清理的最小示例，适合作为第一个插件的起点。
+- [docs/user/develop/basic/tool.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/user/develop/basic/tool.md) — 工具插件开发指南：用 `defineTool` 从零编写一个工具的完整示例与验证流程。
+- [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — dsh 架构文档：本章"扩展点地图"一表的原始出处，另含 profile/bundle 层叠顺序的权威说明。
+- [docs/development.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/development.md) — 仓库开发指南：Host/Client 双聚合构建的来龙去脉，以及 typecheck/check:all 等日常命令的用法。
+- [GitHub topic: dsh-plugin](https://github.com/topics/dsh-plugin) — 社区插件集散地：按 topic 可浏览 TUI、VS Code 集成、Awesome DSH Plugins 等生态项目（截至 2026-08-18 已超 7000 个公开仓库）。
+- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — 官方仓库：`dsh plugin add` 的插件安装机制与 pnpm allowBuilds 拦截的设计背景均可在此追溯。
+- [DeepSeek Harness Releases](https://github.com/deepseek-ai/deepseek-harness/releases) — 官方版本发布页：逐版本的新增扩展点与 breaking change 一览（如 rc.7 起插件可注册设置卡片），升级 dsh 前应先读这里。
+- [pi 仓库](https://github.com/earendil-works/pi) — 同类 harness pi 的源码与 CHANGELOG：v0.81.0 起扩展可注册完整 provider，是观察"扩展点边界外扩"这一行业趋势的对照样本。

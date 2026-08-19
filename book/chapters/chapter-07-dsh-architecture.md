@@ -154,6 +154,8 @@ Cordis loader 的配置支持 `!!js` 表达式插值（见 `cordis-primer.md`“
 
 图 7-2 总结了这套层叠结构：base bundle 提供最底层默认人格，web-app / headless 等 bundle 决定形态，profile patch 与 home patch 承载用户偏好，`--patch` 提供一次性覆盖。由于 patch 是“按 id 整行替换”，组合结果永远是一棵确定性的、可 `--dump-config` 检查的插件树。
 
+本书以 `0.1.0-rc.5` 为分析基线，而 dsh 迭代极快。到 `rc.7`（2026-08-17），有几处演进值得留意：Web UI 的 agent 预设里原「Code mode」更名为 **PTC 模式**（程序化工具调用，底层仍是 Code Mode SDK 与 `run_code` 传输，机制详见 9.4 节）；插件可以向设置页注册自己的设置卡片；`subagent-codex` 与 `subagent-claude-code` 提供器让 Codex、Claude Code 能以子代理身份接入 Job Panel；MCP 与 ACP 通道收到的图片改为经 `dsh-attachment` 持久化为内容寻址附件，不再内联进消息；DeepSeek 官方模型目录新增了 `low` 推理档。这些变化的共同方向与本书主题一致：一切仍是插件，只是插件能触及的面更宽了。
+
 ## 7.6 本章小结
 
 本章建立了理解 dsh 的全局坐标系。要点回顾：
@@ -167,9 +169,10 @@ Cordis loader 的配置支持 `!!js` 表达式插值（见 `cordis-primer.md`“
 
 ## 7.7 本章参考资料
 
-- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — 本章 monorepo 结构、包分组职责地图与 vendored Cordis 的全部事实来源（master，v0.1.0-rc.5）。
-- [崔添翼（tianyi）MIT 发布原推](https://x.com/tianyi/status/2087888089759015218) — 作者宣布 dsh 以 MIT 协议开源的一手来源，支撑本章项目身份与发布背景。
-- [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 支撑本章 Profile / Bundle / Patch 三层组合与"无特权核心"架构描述。
-- [AGENTS.md](https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/AGENTS.md) — 支撑本章 "Registrations are effects"、"Plugins, not loop changes" 等工程宪章约定。
-- [packages/bundle/base/cordis.patch.yml](https://github.com/zenHeart/deepseek-harness/blob/master/packages/bundle/base/cordis.patch.yml) — 支撑本章约 70 个内置插件行的清单与 `!!js` 表达式插值示例。
-- [vendor/README.md](https://github.com/zenHeart/deepseek-harness/blob/master/vendor/README.md) — 支撑本章 vendoring 动机（auditable, patchable, pinned）与上游快照同步策略。
+- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — dsh 官方 monorepo 源码。想亲手验证本章任何论断——包分组、bundle 配置、vendored Cordis——都从这里 clone 开始（本书以 v0.1.0-rc.5 为基线，仓库已迭代至 rc.7）。
+- [dsh GitHub Releases](https://github.com/deepseek-ai/deepseek-harness/releases) — 官方发版页。rc.7 的 PTC 模式更名、设置卡片注册、Codex/Claude Code 子代理接入等演进都有逐版本发版说明，是追踪两个 rc 之间差异的第一站。
+- [崔添翼（tianyi）MIT 发布原推](https://x.com/tianyi/status/2087888089759015218) — dsh 作者宣布项目以 MIT 协议开源的原帖，了解项目发布背景与初衷的一手材料。
+- [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 官方架构文档。Profile / Bundle / Patch 三层组合的权威说明，读完 7.5 节想动手组合自己的 profile 时，先读这份文档。
+- [AGENTS.md](https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/AGENTS.md) — dsh 的工程宪章原文，逐条列出 "Registrations are effects"、"Plugins, not loop changes" 等约定；给 dsh 写插件之前值得通读一遍。
+- [packages/bundle/base/cordis.patch.yml](https://github.com/zenHeart/deepseek-harness/blob/master/packages/bundle/base/cordis.patch.yml) — base bundle 的真实配置文件，约 70 行插件清单与 `!!js` 表达式写法的活教材，可直接对照 7.5 节逐行阅读。
+- [vendor/README.md](https://github.com/zenHeart/deepseek-harness/blob/master/vendor/README.md) — vendoring 决策的自述：为什么框架层必须 auditable / patchable / pinned，以及 18 条本地修改构成的"分歧台账"，做同类 vendoring 决策时的直接参考。

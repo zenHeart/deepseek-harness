@@ -152,7 +152,7 @@ dsh 的设计气质与大多数 AI 产品不同，原因是人的背景。团队
 
 把 dsh 放进同代产品的光谱里看，取舍会更清晰。**Claude Code** 是 TypeScript 单体 + hooks + MCP（仅客户端），“它的很多精华都发生在‘这轮怎么接下一轮’这个问题上……它的 harness 首先是活着的，先得连续活下去，然后才谈如何把规则拆得更漂亮”（harness-books 对比卷）——它选择了迭代速度，扩展面止于 hooks 与 MCP。**Codex CLI** 是 Rust 单体，“把线程、rollout、state bridge、instructions、skills、hooks、sandboxing、exec policy、tools 拆成模块……让控制层显式地长成可组合、可导入、可序列化、可策略化的器官”（同上）——它选择了语言级的性能与类型安全，扩展面同样主要是 MCP。**dsh** 则把整个产品（含 agent loop 本身）放上运行时反应式插件系统。官方文档借媒体之口划出界限：“包括模型适配器、工具注册、Session Log，甚至 Agent Loop 本身都被设计成可以替换的插件……因此，它并不只是‘DeepSeek 版 Claude Code’或者‘DeepSeek 版 Codex’。”（DoNews 报道）
 
-光谱的另一端还有一个参照系：同期爆火的 Pi（GitHub 超 9.3 万 stars，2026-08-18 实时计数）走“核心极简 + 扩展点克制”路线，社区评论“Claude Code 给你 27 种钩子，Pi 就给你 before/after 两个”（36 氪/量子位报道）。于是这个光谱从极简（Pi：两个钩子）到中度（Claude Code：hooks + MCP）到全量（dsh：132 个插件）排开。没有哪一端天然正确：Pi 赌“约束产生清晰”，dsh 赌“可组合性产生生态”。这是两种关于“复杂性应该住在哪里”的不同回答——Pi 把它挡在核心之外，dsh 把它交给可逆的插件系统去治理。
+光谱的另一端还有一个参照系：同期爆火的 Pi（GitHub stars 约 9.37 万，截至 2026-08-19）走“核心极简 + 扩展点克制”路线，社区评论“Claude Code 给你 27 种钩子，Pi 就给你 before/after 两个”（36 氪/量子位报道）。Pi 的归属也在变动：2026 年 4 月 8 日被 Earendil（Armin Ronacher 联合创办）收购，仓库自 badlogic/pi-mono 迁入 earendil-works/pi，5 月 7 日起 npm 包切换至 @earendil-works scope，当前最新版本 v0.84.2（2026-08-14）。于是这个光谱从极简（Pi：两个钩子）到中度（Claude Code：hooks + MCP）到全量（dsh：132 个插件）排开。没有哪一端天然正确：Pi 赌“约束产生清晰”，dsh 赌“可组合性产生生态”。这是两种关于“复杂性应该住在哪里”的不同回答——Pi 把它挡在核心之外，dsh 把它交给可逆的插件系统去治理。
 
 ### 15.7.2 掌声与质疑
 
@@ -172,18 +172,25 @@ dsh 的设计气质与大多数 AI 产品不同，原因是人的背景。团队
 
 ## 15.9 本章参考资料
 
-- [《可逆的插件系统》（Koishi 官方 cookbook）](https://koishi.chat/zh-CN/cookbook/design/disposable.html) — 本章最重要的一手文献：Shigma 自述 Cordis 元框架定位、可逆性动机与"时空可组合性"一词的原始出处。
-- [Cordis 论文仓库（preprint）](https://github.com/cordiverse/paper) — 支撑本章 effect/coeffect 形式化与"理论—框架—产品"闭环的叙事主线。
-- [DeepSeek Harness 官方发布文（微信公众号）](https://mp.weixin.qq.com/s/mANdGRI4fO_sEbC1ECEoZQ) — 支撑本章"一切皆插件"总纲、四种运行模式与 132 插件截图的权衡背景。
-- [Jiayuan Zhang 推文](https://x.com/jiayuan_jy/status/2087911060154314963) — 乐高汽车隐喻、自进化软件雏形与函数式风格的解读，支撑本章对 dsh 设计哲学的讨论。
-- [七牛云新闻：量化思维与 Harness 工程同构](https://news.qiniu.com/archives/1786527719433) — 支撑本章 Jane Street 经验迁移（可审计、可回退、无隐性行为）的方法论论述。
-- [钛媒体：梁文锋有了"隆中对"（2026-05-23）](https://www.tmtpost.com/7999833.html) — 支撑 TSY Capital"机器学习生成信号 + Rust 自研低延迟交易系统"的细节。
-- [钛媒体：在做 Harness 这件事上，DeepSeek 更信搞量化的（2026-05-28）](https://www.tmtpost.com/8005695.html) — 支撑崔添翼完整履历（2008 保送浙大、ACM 六金、2013 入 Jane Street、2022 联创 TSY、2026-03 加入 DeepSeek）。
-- [chooseai：DeepSeek 点将崔添翼（2026-05-21）](https://www.chooseai.net/news/3901/) — 迁移风险分析与"Jane Street 风格工程文化不易复制"引语原文。
-- [知乎专栏：DeepSeek Harness 深度研究（2026-08-14）](https://zhuanlan.zhihu.com/p/2071546145608880421) — 转引 InfoQ"有创新但编排范式未突破"评价。
-- [第一财经（新浪转载）：DeepSeek Harness 预览版来了（2026-08-13）](https://finance.sina.com.cn/tech/roll/2026-08-13/doc-inineuqm9899462.shtml) — "非常酷也非常早期""向 Claude Code 说再见的那一天"等开发者评价原文。
-- [21 世纪经济报道：DeepSeek Harness 公众号正式上线（2026-08-11）](https://www.sfccn.com/2026/8-11/wOMDE0MDdfMjIwNjAwOQ.html) — 宋斐"官方分数可核对、行业统一脚手架"论述原文。
-- [Pi Agent 仓库（badlogic/pi-mono）](https://github.com/badlogic/pi-mono) — README 原文"four tools: read, write, edit, bash""No MCP""No sub-agents""No permission popups"的一手出处；stars 数实时可查。
-- [DoNews 报道](https://www.donews.com/news/detail/1/6670452.html) — 支撑本章 dsh 与 Claude Code / Codex 路线差异（"不只是 DeepSeek 版 Claude Code"）的取舍讨论。
-- [Agent Harness 对比卷（harness-books）](https://harness-books.agentway.dev/book2-comparing/exported/book2-comparing.pdf) — 支撑本章三条路线结构性差异（hooks 单体 / Rust 单体 / 运行时插件系统）的社区一手分析。
-- [chooseai 分析](https://www.chooseai.net/news/3901/) — 支撑本章"未决问题"小节中量化经验迁移风险与工程文化复制难度的质疑面材料。
+- [《可逆的插件系统》（Koishi 官方 cookbook）](https://koishi.chat/zh-CN/cookbook/design/disposable.html) — Shigma 自述 Cordis 元框架定位、可逆性动机与“时空可组合性”三分法的长文，15.2 节的全部引文出自这里，是理解本章的第一站。
+- [Cordis 论文仓库（preprint）](https://github.com/cordiverse/paper) — 《A Programming Paradigm for Spatiotemporal Composability》预印本，effect/coeffect 的形式化定义与“self-evolving agent harnesses”动机句都在其中，适合想从理论侧深入的读者。
+- [DeepSeek Harness 官方发布文（微信公众号）](https://mp.weixin.qq.com/s/mANdGRI4fO_sEbC1ECEoZQ) — “一切皆插件”总纲与四种运行模式的官方定义，附 132 个插件逐条可启停的截图。
+- [Jiayuan Zhang 推文](https://x.com/jiayuan_jy/status/2087911060154314963) — 乐高汽车隐喻、自进化软件雏形与函数式风格的一组短评，是快速感受 dsh 设计哲学的好材料。
+- [七牛云新闻：量化思维与 Harness 工程同构](https://news.qiniu.com/archives/1786527719433) — “执行失败需要回退，所有状态必须可审计，系统不能有隐性行为”的原文出处，15.6 节方法论的核心引文。
+- [钛媒体：梁文锋有了“隆中对”（2026-05-23）](https://www.tmtpost.com/7999833.html) — TSY Capital“机器学习生成信号 + Rust 自研低延迟交易系统”的详细报道。
+- [钛媒体：在做 Harness 这件事上，DeepSeek 更信搞量化的（2026-05-28）](https://www.tmtpost.com/8005695.html) — 崔添翼完整履历：2008 保送浙大、ACM 六金、2013 入 Jane Street、2022 联创 TSY、2026-03 加入 DeepSeek。
+- [chooseai：DeepSeek 点将崔添翼（2026-05-21）](https://www.chooseai.net/news/3901/) — 崔添翼招聘报道，含“Jane Street 风格工程文化在国内招聘市场并不容易复制”的完整讨论。
+- [知乎专栏：DeepSeek Harness 深度研究（2026-08-14）](https://zhuanlan.zhihu.com/p/2071546145608880421) — 收录 InfoQ“有创新但编排范式未突破”等评价的社区综述，适合快速浏览各方观点。
+- [第一财经（新浪转载）：DeepSeek Harness 预览版来了（2026-08-13）](https://finance.sina.com.cn/tech/roll/2026-08-13/doc-inineuqm9899462.shtml) — 收录“非常酷也非常早期”“向 Claude Code 说再见的那一天”等开发者一线评价。
+- [21 世纪经济报道：DeepSeek Harness 公众号正式上线（2026-08-11）](https://www.sfccn.com/2026/8-11/wOMDE0MDdfMjIwNjAwOQ.html) — 宋斐“官方分数与外部复现可直接核对、行业统一脚手架”生态卡位论述的出处。
+- [Pi Agent 仓库（earendil-works/pi）](https://github.com/earendil-works/pi) — README 原文“four tools: read, write, edit, bash”“No MCP”“No sub-agents”“No permission popups”的一手出处。pi 于 2026-04-08 被 Earendil（Armin Ronacher 联合创办）收购，仓库自 badlogic/pi-mono 迁入此组织（旧链接自动跳转），2026-05-07 起 npm 包切换至 @earendil-works scope，当前最新 v0.84.2（2026-08-14）。
+- [pi.dev：pi has a new home（2026-05-07）](https://pi.dev/news/2026/5/7/pi-has-a-new-home) — pi 易主 Earendil、npm 切换至 @earendil-works scope 的官方公告。
+- [rywalker.com：Pi 调研（2026-06）](https://rywalker.com/research/pi) — 第三方调研，覆盖 Pi 的沿革、定位与 Earendil 云端平台 Lefos；其 stars 口径（6.17 万，2026-06）已旧，最新计数见 GitHub 仓库页（约 9.37 万，截至 2026-08-19）。
+- [DoNews 报道](https://www.donews.com/news/detail/1/6670452.html) — “不只是 DeepSeek 版 Claude Code”：dsh 与 Claude Code / Codex 路线差异的对比报道。
+- [Agent Harness 对比卷（harness-books）](https://harness-books.agentway.dev/book2-comparing/exported/book2-comparing.pdf) — 对三条路线结构性差异（hooks 单体 / Rust 单体 / 运行时插件系统）的社区一手分析，15.7.1 节光谱对比的扩展读物。
+- [chooseai 分析](https://www.chooseai.net/news/3901/) — 量化经验迁移风险与工程文化复制难度的质疑面讨论，想听反对意见的读者可以从这篇开始。
+- [新浪科技/快科技：dsh 开源 1.5 小时破 2.4 万 star（2026-08-13）](https://finance.sina.com.cn/tech/discovery/2026-08-13/doc-inineywf3219902.shtml) — GitHub 史上最快涨星纪录的报道：开源 1.5 小时破 2.4 万 star，48 小时破 10 万。
+- [力扣社区：Oh-My-DSH 插件目录（2026-08-16）](https://leetcode.cn/discuss/post/4014099/) — 社区目录 Oh-My-DSH 已收录 1,117 个插件（口径为社区目录自报），想逛插件生态的读者可以从此入门。
+- [财新：阿里 Qoder（2026-07-17）](https://www.caixin.com/2026-07-17/102465253.html) — IDC 中国 AI 编程市场份额 47.6% 第一、全球用户超 500 万，国产 harness 格局的重要一极。
+- [ZAKER：腾讯 CodeBuddy → WorkBuddy（2026-07-31）](https://app.myzaker.com/news/article.php?pk=6a6c8299b15ec004cc69b07f) — 腾讯 AI 编程产品线的更名与演进。
+- [云巴巴：字节 TRAE（2026-08-15）](https://www.yun88.com/news/11931.html) — 字节跳动 TRAE 的进展报道；智谱 ZCode 则走“模型开源、harness 闭源”路线，可作对照。

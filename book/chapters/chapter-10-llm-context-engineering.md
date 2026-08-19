@@ -25,6 +25,8 @@ const stream = preparedCall?.stream(request) ?? this.loopCtx.llm.stream(request)
 
 模型层还有两个配套插件。`dsh-llm-retry` 提供请求级重试：当一次请求失败，主循环走 `agent/request-error` waterfall，监听器可以返回 retry action 让同一个 step 重试；它与 provider 自带的传输级 retryPolicy 形成内外两层——内层处理网络抖动，外层处理语义级失败（比如后面会讲的 context-overflow 恢复）。`dsh-token-meter` 则负责计量：它消费适配器在 `prepareCall` 时解析出的 `contextWindow`（DeepSeek 路由为 1,000,000），持续估算当前投影的 token 占用，是 10.4 节压力压缩策略的"仪表盘"。计量、重试、适配器三者都通过 seam 协作而非互相 import——这正是 capability seam 三角色（Service Definition / Provider / Consumer）在模型层的完整展开。
 
+dsh 把流式 chunk 逐条落日志、UI 与日志都靠增量事件自行组装的姿态，并非孤例。pi（`llm-pi-ai` 底层 `pi-ai` 库所属的 coding agent 项目）在 v0.84.0（2026-08-06）把 JSON/RPC 的 `message_update` 事件改为只发 `assistantMessageEvent` delta，移除了累积的 `message` 字段——动机写得很直白：累积字段会让输出随消息长度二次增长。"只发 delta、由消费方在 start/end 之间自行组装"正在成为流式协议的共识设计。
+
 ## 10.2 llm-deepseek 适配器剖析：四个"按请求"的工程决定
 
 官方适配器 `@deepseek-ai/dsh-llm-deepseek`（`packages/llm/llm-deepseek/src/index.ts`）是理解 dsh 模型层哲学的最佳样本。它做了四个与直觉相反的决定：
@@ -44,6 +46,8 @@ llm-deepseek:
   # API key 不写在这里！密钥经 ctx.credentials 解析，
   # 存于 $DSH_HOME/.credentials.yaml 或 DEEPSEEK_API_KEY 环境变量
 ```
+
+顺带一提行业水位：1M 上下文窗口正在从"卖点"变成一线 harness 的标配。Claude Code 在 2.1.219（2026-07-24）把默认模型切到 1M 上下文的 Claude Opus 5，并在 2.1.110 就引入了 1 小时 TTL 的 prompt cache——窗口越大，缓存命中与压缩策略（10.4 节）对成本和延迟的影响反而越敏感。上游模型也在跟进更细的推理控制：rc.7 起 DeepSeek 官方目录在 `high` 之外新增了 `low` 推理档，轻量任务不必再为满档推理付费。
 
 ## 10.3 llm-pi-ai：多 provider 与自定义网关
 
@@ -124,8 +128,10 @@ catalog provider 还可以用 `modelOverrides` 按模型 id 收窄能力声明�
 
 ## 10.6 本章参考资料
 
-- [packages/llm/llm/src/index.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/llm/llm/src/index.ts) — 支撑本章 `ctx.llm` adapter seam 与 `prepareCall` 绑定适配器的机制。
-- [packages/llm/llm-deepseek/src/index.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/llm/llm-deepseek/src/index.ts) — 支撑本章 DeepSeek 适配器按请求解析连接事实、热覆盖设置与默认模型目录的细节。
-- [docs/subsystems/compaction.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/compaction.md) — 支撑本章压缩作为可选能力 seam、三个 log-only 事件锁与 surface 投影替换的设计。
-- [packages/compaction/compaction-basic](https://github.com/zenHeart/deepseek-harness/tree/master/packages/compaction/compaction-basic) — 支撑本章 token-meter 驱动压力策略、toolResultPruner 先行裁剪与 tool-call/result 配对边界的实现。
-- [AGENTS.md](https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/AGENTS.md) — 支撑本章"Model-visible ⟺ logged"作为新增模型可见输入必须扩展 SessionEventMap 的约束。
+- [packages/llm/llm/src/index.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/llm/llm/src/index.ts) — `ctx.llm` seam 的源码：`registerAdapter` 与 `prepareCall` 的全部实现。想真正理解"每次请求都是一次完整解析"，读这个文件。
+- [packages/llm/llm-deepseek/src/index.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/llm/llm-deepseek/src/index.ts) — DeepSeek 官方适配器源码，10.2 节四个"按请求"决定的原文；写自有适配器时连同同目录的 `sse.ts`、`translate.ts` 一起读。
+- [docs/subsystems/compaction.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/compaction.md) — 压缩子系统官方文档：能力 seam 三角色、三个 log-only 事件锁、surface 投影替换的权威说明。
+- [packages/compaction/compaction-basic](https://github.com/zenHeart/deepseek-harness/tree/master/packages/compaction/compaction-basic) — 压缩 Provider 的实现包：token-meter 压力策略、toolResultPruner 裁剪与 tool-call/result 配对边界的代码都在此，可对照 10.4.2 节逐条验证。
+- [AGENTS.md](https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/AGENTS.md) — dsh 工程宪章原文，"Model-visible ⟺ logged"（新增模型可见输入必须同步扩展 SessionEventMap）的原始约束在此。
+- [Claude Code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) — Claude Code 官方更新日志：默认模型切换至 Opus 5（1M 上下文）、1 小时 prompt cache 等演进逐版本在案，观察"大窗口 + 缓存"行业趋势的一手来源。
+- [pi CHANGELOG](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/CHANGELOG.md) — pi 项目（dsh `llm-pi-ai` 底层 `pi-ai` 库的所属项目）官方变更日志：v0.84.0 将 `message_update` 改为只发 delta 的协议演进与动机，写在 Breaking Changes 一节。

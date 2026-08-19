@@ -318,10 +318,10 @@ effect 的 label（`` `ctx.provide(${JSON.stringify(name)})` ``）也不是装�
 
 ## 5.9 本章参考资料
 
-- [Cordis 仓库](https://github.com/cordiverse/cordis) — 本章逐行剖析的上游源码仓库（master 快照，MIT 协议）。
-- [fiber.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/fiber.ts) — 支撑本章 Fiber 生命周期状态机、disposer LIFO 逆序执行与 epoch 反应式重启的实现细节。
-- [reflect.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/reflect.ts) — 支撑本章 Proxy get 处理器、服务 `provide()` 撤销路径与 `notify()` 唤醒依赖方的源码依据。
-- [registry.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/registry.ts) — 支撑本章插件三形态、`inject`/`provide` 元数据与 Standard Schema 配置校验。
-- [events.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/events.ts) — 支撑本章 emit/parallel/serial/bail/waterfall 五种类型化事件分发模式。
-- [service.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/service.ts) — 支撑本章 Service 基类自动注册进上下文的实现。
-- [Cordis 入门（dsh 官方文档）](https://deepseek-harness.github.io/deepseek-harness/reference/cordis-primer) — 官方中文入门，对照本章源码剖析的概念地图。
+- [Cordis 仓库](https://github.com/cordiverse/cordis) — Cordis 上游仓库（master 快照，MIT 协议），本章逐行剖析的源码都在这里。
+- [fiber.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/fiber.ts) — Fiber 的实现源码：生命周期状态机、disposer LIFO 逆序执行与 epoch 反应式重启。
+- [reflect.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/reflect.ts) — 服务解析的实现源码：Proxy get 处理器、`provide()` 的撤销路径与 `notify()` 唤醒依赖方。
+- [registry.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/registry.ts) — 插件注册的实现源码：插件三形态、`inject`/`provide` 元数据与 Standard Schema 配置校验。
+- [events.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/events.ts) — 事件系统的实现源码：emit/parallel/serial/bail/waterfall 五种类型化分发模式。
+- [service.ts（Cordis 源码）](https://github.com/cordiverse/cordis/blob/master/packages/core/src/service.ts) — Service 基类的实现源码，看它如何自动注册进上下文。
+- [Cordis 入门（dsh 官方文档）](https://deepseek-harness.github.io/deepseek-harness/reference/cordis-primer) — 官方中文入门，可作为本章源码剖析的概念地图先行阅读。

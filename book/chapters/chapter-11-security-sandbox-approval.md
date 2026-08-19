@@ -131,6 +131,10 @@ ctx.emit('fs/observed', target, { kind: 'present', version: outcome.version }, e
 
 与默认关闭形成对照的是默认开启但只写的遥测姿态：`dsh-session-telemetry-otel`（OTLP/HTTP）在 bundle 里默认 DISABLED，需要环境变量显式开启；`dsh-session-query-sqlite` 的 FTS5 全文索引默认 `openAt: never`。安全章节之所以提到它们，是因为它们共享同一条设计语法——**凡是会改变数据流向的能力（出网、建索引、外发），默认值都选在信息不外流的那一侧**。当你审计一个 dsh 部署是否"开箱安全"时，沿着 base bundle 的 70 行配置逐行看 `disabled` 与默认值，就能得到完整答案——这也是"everything is a plugin"给安全审计带来的意外红利：攻击面是枚举得完的。
 
+把 dsh 的双层设计放回行业坐标里看会更有体感。同期 Claude Code 的权限与沙箱体系也在快速收敛到类似的语法：2.1.178 引入 `Tool(param:value)` 形式的权限规则（如 `Agent(model:opus)`），把授权粒度细化到工具的某个参数取值；沙箱侧，2.1.187 起 `sandbox.credentials` 支持把凭证文件与 secret 环境变量隔离进沙箱，2.1.219 新增 `sandbox.network.strictAllowlist` 严格网络白名单，2.1.221 再加 `mode: "mask"` 掩码；2.1.233/2.1.234 则修复了 Windows NT 路径的 NTLM 凭据泄露向量（均见官方 CHANGELOG）。
+
+这个对照的意义在于：fail-closed、enforcement 如实上报、MCP 与 web_fetch 默认关闭，并不是 dsh 孤立的偏执，而是整个 agent harness 行业在同一威胁模型下收敛出的共同答案——权限规则要可组合到参数级、凭证要在沙箱内隔离、Windows 这类覆盖不全的平台要当作泄露面来逐个封堵。各家真正的差别只在默认值的选择：dsh 把最保守的一档做成了开箱默认。
+
 ## 11.7 本章小结
 
 - dsh 的安全是**双层结构**：审批层（`ctx.approval`，一次性询问）管"要不要问人"，沙箱层（`ctx.sandbox`，OS 级强制）管"能碰到什么"；总原则 fail-closed——任何环节故障/缺失一律拒绝。
@@ -144,8 +148,9 @@ ctx.emit('fs/observed', target, { kind: 'present', version: outcome.version }, e
 
 ## 11.8 本章参考资料
 
-- [docs/subsystems/approval.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/approval.md) — 支撑本章 ApprovalOutcome 封闭且 fail-closed、`unavailable` 不开闸与 approval/asked+decided 审计对的设计。
-- [docs/subsystems/sandbox.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/sandbox.md) — 支撑本章沙箱三档模式、SandboxExecutionPolicy 与 enforcement full/partial 显式上报的机制。
-- [native/README.md](https://github.com/zenHeart/deepseek-harness/blob/master/native/README.md) — 支撑本章 Linux Landlock 自研原生启动器与 bwrap/Seatbelt/Windows ACL 后端的细节。
-- [packages/bundle/base/cordis.patch.yml](https://github.com/zenHeart/deepseek-harness/blob/master/packages/bundle/base/cordis.patch.yml) — 支撑本章权限预设默认值与 web_fetch 默认禁用（SSRF 考量）的内联注释原文。
-- [packages/mcp/README.md](https://github.com/zenHeart/deepseek-harness/blob/master/packages/mcp/README.md) — 支撑本章 MCP 默认关闭、每个 MCP server 一个插件实例的 opt-in 设计。
+- [docs/subsystems/approval.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/approval.md) — dsh 审批子系统的设计文档：ApprovalOutcome 封闭四值的完整定义、会话策略 `ask`/`never` 的语义，以及 `approval/asked`+`approval/decided` 事件对的日志格式。
+- [docs/subsystems/sandbox.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/sandbox.md) — 沙箱子系统设计文档：三档 SandboxMode、SandboxExecutionPolicy 的字段含义，以及 `full`/`partial` enforcement 的上报契约。
+- [native/README.md](https://github.com/zenHeart/deepseek-harness/blob/master/native/README.md) — 自研原生沙箱启动器的说明：Linux Landlock 启动器的实现与按平台分发方式，以及 bwrap/Seatbelt/Windows ACL 三个后端的分工。
+- [packages/bundle/base/cordis.patch.yml](https://github.com/zenHeart/deepseek-harness/blob/master/packages/bundle/base/cordis.patch.yml) — base bundle 的真实配置文件：权限预设默认值、web_fetch 默认禁用等决定都以带注释的 YAML 原文呈现，可逐行对照本章论述。
+- [packages/mcp/README.md](https://github.com/zenHeart/deepseek-harness/blob/master/packages/mcp/README.md) — MCP 客户端插件的说明文档：默认关闭的理由，以及"每个 MCP server 一个插件实例"的 opt-in 接入方式。
+- [Claude Code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) — Claude Code 官方更新日志：可逐版本追溯其权限规则语法（`Tool(param:value)`）与沙箱凭证隔离、网络白名单的演进，是本章行业对照段落的一手来源。

@@ -202,6 +202,8 @@ export DSH_TELEMETRY_DISABLED=1              # 硬性关闭
 
 默认情况下 `$DSH_HOME` 指向用户主目录下的固定位置，但它是可覆盖的——把不同项目群、不同信任等级的 agent 活动拆进不同 home，是最朴素也最有效的隔离手段：每个 home 有独立的 settings、credentials、profiles 与 patch 层，互不可见。配合调用目录即工作区根的约定，一个推荐的目录纪律是：进入项目目录 → 确认（或设置）home → 再启动 dsh。需要排查"我的配置到底生没生效"时，记住 12.5.3 的 `--dump-config`——它打印的是组合后的最终树，每行标注来源文件，比逐个文件肉眼 diff 可靠得多。
 
+横向对比一下同类工具的取舍，更能看清这套设计的边界。pi 在 v0.79.0（2026-06-08）引入了 Project Trust 机制：加载项目本地的 settings、resources、packages 之前必须经用户显式批准（`--approve` / `--no-approve`）；v0.84.1 又加了 `pi auth check` 做凭证预检，把"key 没配好"提前到启动阶段报出。dsh 走了另一条路：配置与插件树一律收在 `$DSH_HOME` 下，**不自动加载项目目录里的任何配置**——项目目录只是沙箱的工作区根，本身不构成信任来源，因此不需要一道"是否信任本项目"的闸门；而凭证问题则按第 10 章的设计保留为请求时的 `MISSING_CREDENTIAL` 错误，让"连不上"与"没配好"在报错语义上分流。两种取舍没有高下：pi 把项目本地配置当功能（于是需要信任闸门），dsh 把默认面收窄到"项目目录零信任"。
+
 ## 12.7 headless 与脚本化 / CI
 
 headless profile 是一次性无头模式：新建持久会话、执行任务、把最终答案打到 stdout 并退出。不开端口、不写 stderr，退出码语义干净——`completed` 为 0，其余为 1，可直接进 shell 条件判断：
@@ -253,9 +255,10 @@ fi
 
 ## 12.10 本章参考资料
 
-- [npm @deepseek-ai/dsh](https://www.npmjs.com/package/@deepseek-ai/dsh) — 支撑本章 `npx @deepseek-ai/dsh web` 安装运行方式与官方分发渠道（区别于 PyPI 同名混淆项目）。
-- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — 支撑本章从源码运行（pnpm install / build / dsh web）与 Developer Preview 破坏性变更警告。
-- [DeepSeek Harness 官网](https://deepseek.com/harness/) — 官方入口，支撑本章 Web UI 默认地址与产品定位。
-- [apps/cli/reference/README.md](https://github.com/zenHeart/deepseek-harness/blob/master/apps/cli/reference/README.md) — 支撑本章 CLI profile 启动器、headless 模式、权限预设与遥测环境变量的细节。
-- [docs/user/guide/index.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/user/guide/index.md) — 支撑本章 Web UI 四步上手流程（配置模型、选择工作区、运行任务）。
-- [docs/user/guide/providers.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/user/guide/providers.md) — 支撑本章目录 provider、自定义 provider 与凭据解析顺序的配置说明。
+- [npm @deepseek-ai/dsh](https://www.npmjs.com/package/@deepseek-ai/dsh) — dsh 官方 npm 包页面：最新版本号与安装命令的唯一权威入口，也是辨别 PyPI 同名混淆项目的对照物。
+- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — 官方源码仓库：README 中有从源码运行的完整步骤，以及 Developer Preview 阶段破坏性变更的警告。
+- [DeepSeek Harness 官网](https://deepseek.com/harness/) — 产品官方入口：Web UI 默认地址、功能概览与产品定位。
+- [apps/cli/reference/README.md](https://github.com/zenHeart/deepseek-harness/blob/master/apps/cli/reference/README.md) — CLI 参考文档：profile 启动器的全部 flag、headless 模式、权限预设与遥测环境变量逐条可查。
+- [docs/user/guide/index.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/user/guide/index.md) — 官方用户指南首页：Web UI 从配置模型、选择工作区到跑通第一个任务的完整上手流程。
+- [docs/user/guide/providers.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/user/guide/providers.md) — provider 配置指南：目录内置 provider 与自定义 provider 的字段说明，以及凭据解析顺序的官方表述。
+- [pi 仓库](https://github.com/earendil-works/pi) — 同类 harness pi 的源码与 CHANGELOG：Project Trust 机制（v0.79.0）与 `pi auth check` 凭证预检（v0.84.1）的原始发布说明都在这里，12.6.6 节的横向对照即出自于此。

@@ -186,8 +186,8 @@ dsh 的事件分三个域，职责清晰：
 
 ## 8.8 本章参考资料
 
-- [packages/core/agent-loop/src/agent.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/agent-loop/src/agent.ts) — 支撑本章 ReactLoopAgent 的 inbox 收件箱、turn/step 相位机与主循环代码。
-- [packages/core/agent-loop/src/tool-calls.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/agent-loop/src/tool-calls.ts) — 支撑本章并行工具调用的"有界滚动池 + 屏障"调度与按模型序提交结果的实现。
-- [docs/subsystems/session.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/session.md) — 支撑本章 Session 作为 append-only 事件溯源日志、"回放即重新派生"的设计。
-- [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 支撑本章 Turn/Step 事件流、"Model-visible ⟺ logged" 运行时不变量与三个事件域的划分。
-- [AGENTS.md](https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/AGENTS.md) — 支撑本章 waterfall 监听器必须调用 `next()` 等循环侧工程约定。
+- [packages/core/agent-loop/src/agent.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/agent-loop/src/agent.ts) — `ReactLoopAgent` 的完整源码：inbox 收件箱、turn/step 相位机、主循环全在这一个文件里。8.3 节的每段摘录都标了行号，建议打开原文对照精读。
+- [packages/core/agent-loop/src/tool-calls.ts](https://github.com/zenHeart/deepseek-harness/blob/master/packages/core/agent-loop/src/tool-calls.ts) — 并行工具调度的全部实现，百余行。"有界滚动池 + 屏障"与按模型序提交结果的原文，8.5 节的三个细节都可在此复核。
+- [docs/subsystems/session.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/session.md) — session 子系统官方文档：append-only 事件日志、"回放即重新派生"投影模型的权威说明，想自己实现事件溯源会话时的范本。
+- [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 官方架构文档：Turn/Step 事件流、"Model-visible ⟺ logged" 不变量与三个事件域划分的出处，本章概念地图的官方版本。
+- [AGENTS.md](https://raw.githubusercontent.com/deepseek-ai/deepseek-harness/master/AGENTS.md) — dsh 工程宪章原文，waterfall 监听器必须调用 `next()` 等循环侧约定在此；准备在 `agent/*` 事件上写拦截插件前，先读它。

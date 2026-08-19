@@ -53,7 +53,7 @@ dsh 的技术气质，由两个人的背景共同写成。读懂这两个人，�
 
 | 日期 | 事件 |
 |---|---|
-| 2026-07-06/07 | "DeepSeek Harness 团队"微信公众号注册（07-06）并完成企业认证（07-07），黑鲸 Logo，认证主体为北京深度求索（21 世纪经济报道查证公众号信息，2026-08-11） |
+| 2026-07-06/07 | "DeepSeek Harness 团队"微信公众号注册（07-06）并完成企业认证（07-07），黑鲸 Logo，认证主体为北京深度求索（据 21 世纪经济报道，2026-08-11） |
 | 2026-07-31 | V4-Flash 正式版 API 公测，官方文档首次出现"DeepSeek Harness 极简模式（即将发布）" |
 | 2026-08-01/02 | 崔添翼在 X 上面向全球公开招募内测用户，优先有 Agent Harness 开源项目经验者 |
 | 2026-08-03（截至） | 内测招募变成全球开源 Agent 生态大摸底：**769 位开发者报名、712 个去重仓库、累计 120 万+ Stars、覆盖 18 个赛道** |
@@ -84,7 +84,7 @@ dsh 的技术气质，由两个人的背景共同写成。读懂这两个人，�
 
 ### 2.4.2 安全事件：国产化替代的时间窗口
 
-第二条力量是安全。2026 年 6 月，Claude Code 被曝"**隐写回传**"事件（客户端将代理域名、系统时区等信息以 Unicode 隐写方式回传）；工信部 NVDB 随后于 2026-07-08 发布安全后门风险提示（受影响版本 2.1.91–2.1.196）；阿里、腾讯、美团、京东等公司相继排查并转向自研 Harness（东方财富，2026-08-11；河北网信网转载《中国信息安全》，2026-07-15）。
+第二条力量是安全。2026 年 6 月 30 日，一位开发者逆向 Claude Code 2.1.196 后在 Reddit 曝光了"**隐写回传**"问题：客户端会检测系统时区（上海、乌鲁木齐）与代理域名，并把这些信息藏进 Unicode 撇号、日期标点等隐写编码，随请求悄悄回传；相关代码自 2026-04-02 发布的 2.1.91 起便已植入。Anthropic 团队成员 Thariq Shihipar 随后承认，这是 2026 年 3 月上线的实验性反滥用措施，并已在 2026-07-02 的新版本中移除（IT之家，2026-07-08；观察者网，2026-07-08）；工信部 NVDB 亦于 2026-07-08 发布安全后门风险提示，受影响版本覆盖 2.1.91–2.1.196（河北网信网转载《中国信息安全》，2026-07-15）。国内厂商的反应接踵而至：阿里 2026-07-03 发出内部通知，07-10 起全面禁用 Claude 全系工具并以自研的 Qoder 替代（人民网，2026-07-10；东方财富，2026-07-08）；腾讯则将 CodeBuddy 升级为自研的 WorkBuddy（ZAKER，2026-07-31）。
 
 这件事的行业影响立竿见影：企业突然意识到，Harness 层决定着**数据出境、权限边界与可审计性**——模型可以是黑盒，但 Harness 必须是白盒。一个 MIT 开源、可完全自托管、插件机制透明可审计的国产 Harness，恰好踩在了这个需求爆发的时间窗口上。DeepSeek Harness 选择 MIT 协议与全开源路线，商业之外的这层战略考量不言而喻。
 
@@ -118,7 +118,7 @@ npx @deepseek-ai/dsh web
 
 - **2026-05-18**，DeepSeek 官网挂出 Agent Harness 岗位，JD 原文写明 "Model + Harness = Agent"；**05-20**，资深研究员陈德里在 X 证实"从零做 Code Harness，对标 Claude Code"。
 - 团队负责人**崔添翼**：浙大计算机系、Jane Street 九年量化背景（2026-03 加入 DeepSeek）——量化系统"把概率模型翻译成可审计、可回退的确定性执行"与 Harness 工程高度同构；Cordis / Koishi 生态的作者**史一凡（Shigma）**同样已在 DeepSeek（论文一作），这两条人马的汇合直接决定了 dsh 的技术底座，也为本书"从 Cordis 讲起"埋下伏笔。
-- 7–8 月闪电推进：公众号注册并完成企业认证（07-06/07，21 世纪经济报道查证）→ V4-Flash 公测剧透"Harness 极简模式"（07-31）→ 全球内测招募（08-01，769 人 / 712 仓库 / 120 万+ Stars / 18 赛道）→ 媒体集中报道公众号（08-11/12）→ **v0.1 与 V4-Pro 同日 MIT 开源（08-13）**——内测期间社区已产出约 300 个插件，开源后一周 GitHub topic 公开仓库突破 7000 个（2026-08-18 实时计数）。
+- 7–8 月闪电推进：公众号注册并完成企业认证（07-06/07，据 21 世纪经济报道）→ V4-Flash 公测剧透"Harness 极简模式"（07-31）→ 全球内测招募（08-01，769 人 / 712 仓库 / 120 万+ Stars / 18 赛道）→ 媒体集中报道公众号（08-11/12）→ **v0.1 与 V4-Pro 同日 MIT 开源（08-13）**——内测期间社区已产出约 300 个插件，开源后一周 GitHub topic 公开仓库突破 7000 个（截至 2026-08-18）。
 - 战略解读：卖 token 的商业逻辑见顶，转向"卖工作流结果"；Claude Code 隐写回传事件（2026-06）催生国产可审计 Harness 的窗口期；"更便宜的模型 + 更好的 Harness 优化"构成几十分之一的成本叙事。
 - dsh 官方定位四要素：**Everything is a Plugin**、**Powered by Cordis**、**MIT 开源**、**Developer Preview 破坏性变更警告**——它们是贯穿全书的四条主线。
 
@@ -126,22 +126,27 @@ npx @deepseek-ai/dsh web
 
 ## 2.7 本章参考资料
 
-- [DeepSeek Harness 官方发布文（微信公众号）](https://mp.weixin.qq.com/s/mANdGRI4fO_sEbC1ECEoZQ) — 官方《DeepSeek Harness 开发者预览版：一切皆插件》，支撑本章 v0.1 发布、"一切皆插件"总纲与四种运行模式的表述。
-- [DeepSeek Harness 官网](https://deepseek.com/harness/) — 官方产品入口与文档，支撑本章 dsh 官方定位与获取渠道。
-- [崔添翼（tianyi）MIT 发布原推](https://x.com/tianyi/status/2087888089759015218) — dsh 作者在 X 宣布开源发布的一手来源，支撑本章 2026-08-13 开源时间线。
-- [Jiayuan Zhang 推文](https://x.com/jiayuan_jy/status/2087911060154314963) — DSH 乐高汽车隐喻与"自进化软件雏形"的解读，支撑本章对 dsh 定位的形象化阐释。
-- [华尔街见闻转载的官方发布文](https://wallstreetcn.com/articles/3779385) — 发布文全文转载（澎湃转载确认系公众号原文），支撑本章发布细节与 132 插件截图事实。
-- [36 氪《在做 Harness 这件事上，DeepSeek 更信搞量化的》](https://m.36kr.com/p/3828532121837831) — 支撑本章崔添翼履历与 DeepSeek 组建 Harness 团队的背景报道。
-- [腾讯云开发者社区报道](https://developer.cloud.tencent.com/news/4358005) — 支撑本章 V4-Flash 文档中"DeepSeek Harness 极简模式"作为官方基准底座的线索。
-- [界面新闻：DeepSeek 智能体要来了？公众号已完成注册认证（2026-08-12）](https://m.jiemian.com/article/14910886.html) — 支撑公众号注册时间（08-11/12，认证主体北京深度求索、黑鲸 Logo）与"Model + Harness = Agent"招聘原文。
-- [智东西：DeepSeek 全球内测招募报道（2026-08-04，腾讯新闻转载）](https://view.inews.qq.com/a/20260804A0BP5100) — 支撑 769 位开发者报名 / 712 个去重仓库 / 120 万+ Stars / 18 个赛道的内测统计数据（截至 2026-08-03）。
-- [量子位：DeepSeek 缺 Agent 人才缺疯了（2026-06-22）](https://qbitai.com/2026/06/437249.html) — 支撑崔添翼 5 月起公开招聘、三岗位 JD（Harness 研究员/工程师/产品经理）与"笔试+三轮面试"流程。
-- [新浪：DeepSeek Harness 发布时间？v0.1 开发者预览版 8 月 13 日上线，内测插件超 300 个（2026-08-13）](https://cj.sina.cn/articles/view/7880069125/1d5b0500506801tym4) — 支撑"内测期间社区已产出约 300 个插件"的时间归属。
-- [GitHub topic: dsh-plugin](https://github.com/topics/dsh-plugin) — 插件生态实时计数来源：截至 2026-08-18 已超 7000 个公开仓库。
-- [21 世纪经济报道：DeepSeek Harness 公众号正式上线（2026-08-11）](https://www.sfccn.com/2026/8-11/wOMDE0MDdfMjIwNjAwOQ.html) — 直接查证公众号信息（2026-07-06 注册、07-07 完成认证），并含宋斐"行业统一脚手架"论述原文。
-- [东方财富：官方公众号落地，DeepSeek 的智能体工具团队来了（2026-08-11）](https://finance.eastmoney.com/a/202608113838103894.html) — 支撑 Claude Code 隐写回传事件（2026-06 社区曝光、NVDB 通报、大厂排查）的完整脉络。
-- [河北网信网转载《中国信息安全》：谨防境外 AI"后门"风险（2026-07-15）](https://www.caheb.gov.cn/system/2026/07/15/030389582.shtml) — 工信部 NVDB 风险提示（受影响版本 2.1.91–2.1.196）的权威转载。
-- [潮新闻：鲸鱼哥前脚离开，DeepSeek 被曝组建 Harness 团队（2026-05-20）](https://tidenews.com.cn/news.html?id=3450320) — 支撑"第三方实现类 Claude Code 体验、成本仅几十分之一"的早期报道（DeepSeek-TUI）。
-- [火山引擎开发者社区：Claude Code 实战 400 万 Tokens，接入 DeepSeek V4 从 $26 降到 $2.3（2026-05-28）](https://developer.volcengine.com/articles/7644841957348343844) — 成本论断的同量级账单实测。
-- [钛媒体：AI Coding，终究是大厂的（2026-04-20）](https://www.tmtpost.com/7960048.html) — 转引 Research and Markets 市场规模数据（2025 年 295.7 亿美元 → 2030 年 646.8 亿美元）。
-- [36 氪：DeepSeek 的「自进化」蓝图，曝光了（2026-08-14）](https://www.36kr.com/p/3938795963137411) — 支撑论文三位作者署名（史一凡一作、北京大学张伟组、崔添翼三作）与史一凡曾署名 DeepSeek-V3 技术报告的核查。
+- [DeepSeek Harness 官方发布文（微信公众号）](https://mp.weixin.qq.com/s/mANdGRI4fO_sEbC1ECEoZQ) — 官方发布文《DeepSeek Harness 开发者预览版：一切皆插件》，含四种运行模式与 132 个内测插件截图。
+- [DeepSeek Harness 官网](https://deepseek.com/harness/) — dsh 官方产品页与文档入口，可获取最新版本与安装指引。
+- [崔添翼（tianyi）MIT 发布原推](https://x.com/tianyi/status/2087888089759015218) — Harness 团队负责人在 X 上宣布 2026-08-13 v0.1 开源的原始帖子。
+- [Jiayuan Zhang 推文](https://x.com/jiayuan_jy/status/2087911060154314963) — 对 dsh 定位的形象化解读：乐高汽车隐喻与"自进化软件雏形"的判断。
+- [华尔街见闻转载的官方发布文](https://wallstreetcn.com/articles/3779385) — 官方发布文的全文转载（经澎湃确认为公众号原文），方便无法访问公众号的读者阅读，含 132 个内测插件截图。
+- [36 氪《在做 Harness 这件事上，DeepSeek 更信搞量化的》](https://m.36kr.com/p/3828532121837831) — 36 氪人物报道：崔添翼的 Jane Street 量化履历与 DeepSeek 组建 Harness 团队的来龙去脉。
+- [腾讯云开发者社区报道](https://developer.cloud.tencent.com/news/4358005) — V4-Flash 公测相关报道，其中可见官方文档"DeepSeek Harness 极简模式（即将发布）"的表述。
+- [界面新闻：DeepSeek 智能体要来了？公众号已完成注册认证（2026-08-12）](https://m.jiemian.com/article/14910886.html) — 界面新闻报道：DeepSeek Harness 公众号注册与认证信息（认证主体北京深度求索、黑鲸 Logo），以及"Model + Harness = Agent"招聘原文。
+- [智东西：DeepSeek 全球内测招募报道（2026-08-04，腾讯新闻转载）](https://view.inews.qq.com/a/20260804A0BP5100) — 智东西对全球内测招募的报道：769 位开发者报名、712 个去重仓库、120 万+ Stars、覆盖 18 个赛道（截至 2026-08-03）。
+- [量子位：DeepSeek 缺 Agent 人才缺疯了（2026-06-22）](https://qbitai.com/2026/06/437249.html) — 量子位报道：DeepSeek Harness 团队 5 月起的公开招聘，含 Harness 研究员/工程师/产品经理三岗位 JD 与"笔试+三轮面试"流程。
+- [新浪：DeepSeek Harness 发布时间？v0.1 开发者预览版 8 月 13 日上线，内测插件超 300 个（2026-08-13）](https://cj.sina.cn/articles/view/7880069125/1d5b0500506801tym4) — 新浪报道：v0.1 开发者预览版上线动态，提及内测期间社区已产出约 300 个插件。
+- [GitHub topic: dsh-plugin](https://github.com/topics/dsh-plugin) — GitHub `dsh-plugin` topic 页面，可按最新排序浏览社区插件生态；截至 2026-08-18 公开仓库已超 7000 个。
+- [21 世纪经济报道：DeepSeek Harness 公众号正式上线（2026-08-11）](https://www.sfccn.com/2026/8-11/wOMDE0MDdfMjIwNjAwOQ.html) — 21 世纪经济报道：DeepSeek Harness 公众号上线报道（2026-07-06 注册、07-07 完成认证），含宋斐"行业统一脚手架"的论述。
+- [东方财富：官方公众号落地，DeepSeek 的智能体工具团队来了（2026-08-11）](https://finance.eastmoney.com/a/202608113838103894.html) — 东方财富报道：DeepSeek Harness 官方公众号上线，并回顾 Claude Code 隐写回传事件与 NVDB 通报的行业背景。
+- [河北网信网转载《中国信息安全》：谨防境外 AI"后门"风险（2026-07-15）](https://www.caheb.gov.cn/system/2026/07/15/030389582.shtml) — 河北网信网转载《中国信息安全》文章：工信部 NVDB 安全后门风险提示全文，受影响版本 2.1.91–2.1.196。
+- [IT之家：Claude Code 隐写回传事件报道（2026-07-08）](https://www.ithome.com/0/974/001.htm) — IT之家报道：Claude Code 隐写回传事件始末——Reddit 曝光、Thariq Shihipar 承认系实验性反滥用措施、07-02 新版本移除。
+- [观察者网：Claude Code 隐写回传事件报道（2026-07-08）](https://www.guancha.cn/economy/2026_07_08_823034.shtml) — 观察者网报道：隐写回传事件的技术细节（时区与代理域名检测、Unicode 隐写编码）与 Anthropic 的回应。
+- [人民网：阿里禁用 Claude 相关报道（2026-07-10）](http://opinion.people.com.cn/n1/2026/0710/c462004-40757584.html) — 人民网报道：阿里 2026-07-03 发出内部通知，07-10 起全面禁用 Claude 全系工具，并以自研的 Qoder 替代。
+- [东方财富：阿里排查 Claude 工具报道（2026-07-08）](https://finance.eastmoney.com/a/202607083798528563.html) — 东方财富报道：阿里排查并停用 Claude 相关工具、转向自研替代方案的过程。
+- [ZAKER：腾讯 WorkBuddy 报道（2026-07-31）](https://app.myzaker.com/news/article.php?pk=6a6c8299b15ec004cc69b07f) — ZAKER 报道：腾讯将 CodeBuddy 升级为自研 WorkBuddy 的经过。
+- [潮新闻：鲸鱼哥前脚离开，DeepSeek 被曝组建 Harness 团队（2026-05-20）](https://tidenews.com.cn/news.html?id=3450320) — 潮新闻报道：DeepSeek 组建 Harness 团队的早期消息，提及第三方以 DeepSeek 模型实现类 Claude Code 体验、成本仅几十分之一（DeepSeek-TUI）。
+- [火山引擎开发者社区：Claude Code 实战 400 万 Tokens，接入 DeepSeek V4 从 $26 降到 $2.3（2026-05-28）](https://developer.volcengine.com/articles/7644841957348343844) — 火山引擎开发者社区实测：同量级 Claude Code 任务接入 DeepSeek V4 后，账单从 $26.4 降到 $2.3。
+- [钛媒体：AI Coding，终究是大厂的（2026-04-20）](https://www.tmtpost.com/7960048.html) — 钛媒体行业分析，引用 Research and Markets 数据：全球 AI 编程工具市场 2025 年 295.7 亿美元，预计 2030 年达 646.8 亿美元。
+- [36 氪：DeepSeek 的「自进化」蓝图，曝光了（2026-08-14）](https://www.36kr.com/p/3938795963137411) — 36 氪报道：Cordis 论文署名信息（史一凡一作、北京大学张伟组、崔添翼三作）、史一凡曾署名 DeepSeek-V3 技术报告，以及 DeepSeek"自进化"蓝图解读。
