@@ -37,55 +37,70 @@ jobs:
   build:
     name: Build EPUB
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
+      # ----------------------------------------------------------
+      # 根治 apt stall（历史故障：azure 镜像源连接挂起，45 分钟全卡在本步）。
+      # 策略：
+      # 1. 按需安装 —— ubuntu-latest 已预装 Chrome 及全部 GTK 运行库与
+      #    emoji 字体，用功能检测（fc-list / rsvg-convert）决定是否要跑 apt；
+      #    历史日志显示真正需要安装的只有 fonts-noto-cjk* 与 librsvg2-bin。
+      # 2. 分段硬超时 —— apt 的 Acquire 超时让单个挂起的连接在 15–20s 内失败
+      #    并切换下一个镜像，timeout(1) 给整步一个不可逾越的上界。
+      # 3. 清索引重试 —— 每次重试前清空 /var/lib/apt/lists，避免半截索引。
+      # ----------------------------------------------------------
       - name: Install system packages
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            fonts-noto-cjk \
-            fonts-noto-cjk-extra \
-            fonts-noto-color-emoji \
-            librsvg2-bin \
-            libatk-bridge2.0-0 \
-            libatk1.0-0 \
-            libasound2t64 \
-            libcups2 \
-            libdrm2 \
-            libgbm1 \
-            libgtk-3-0 \
-            libnss3 \
-            libpango-1.0-0 \
-            libxcomposite1 \
-            libxdamage1 \
-            libxfixes3 \
-            libxkbcommon0 \
-            libxrandr2 \
-            libxshmfence1 \
-            libxss1
+          set -e
+          pkgs=()
+          fc-list 2>/dev/null | grep -qi "Noto Sans CJK" || pkgs+=(fonts-noto-cjk fonts-noto-cjk-extra)
+          fc-list 2>/dev/null | grep -qi "Noto Color Emoji" || pkgs+=(fonts-noto-color-emoji)
+          command -v rsvg-convert >/dev/null 2>&1 || pkgs+=(librsvg2-bin)
+
+          if [ ${#pkgs[@]} -eq 0 ]; then
+            echo "All fonts/tools already present — skipping apt entirely."
+          else
+            echo "Need to install: ${pkgs[*]}"
+            ok=0
+            for attempt in 1 2 3; do
+              echo "=== apt attempt ${attempt}/3 ==="
+              sudo rm -rf /var/lib/apt/lists/*
+              if timeout 240 sudo apt-get update \
+                    -o Acquire::Retries=2 \
+                    -o Acquire::http::Timeout=15 \
+                    -o Acquire::https::Timeout=15 \
+                && timeout 300 sudo apt-get install -y --no-install-recommends \
+                    -o Acquire::Retries=2 \
+                    -o Acquire::http::Timeout=20 \
+                    -o Acquire::https::Timeout=20 \
+                    "${pkgs[@]}"; then
+                ok=1
+                break
+              fi
+              echo "apt attempt ${attempt} failed; retrying in 10s..."
+              sleep 10
+            done
+            if [ "$ok" != 1 ]; then
+              echo "apt failed after 3 attempts"
+              exit 1
+            fi
+          fi
           fc-list | grep -i "noto sans cjk" | head -2
           rsvg-convert --version
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
+          # setup-node 内置的 npm 缓存已覆盖 ~/.npm，无需额外的 actions/cache 步骤
           cache: npm
           cache-dependency-path: |
             book/package-lock.json
             package-lock.json
-
-      - name: Cache npm package store
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: npm-book-${{ runner.os }}-${{ hashFiles('book/package-lock.json', 'package-lock.json') }}
-          restore-keys: |
-            npm-book-${{ runner.os }}-
 
       - name: Install book build dependencies
         working-directory: book
@@ -123,7 +138,7 @@ jobs:
           test "$chapter_count" -eq "$expected_count"
 
       - name: Upload EPUB artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: book-epub
           path: book/${{ env.EPUB_NAME }}
@@ -131,7 +146,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload cover artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: book-cover
           path: |
@@ -142,7 +157,7 @@ jobs:
 
       - name: Upload debug artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: book-debug
           path: |
@@ -153,7 +168,7 @@ jobs:
 
       - name: Attach to GitHub Release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             book/${{ env.EPUB_NAME }}
@@ -172,16 +187,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download EPUB artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: book-epub
           path: ./download
 
       - name: Download cover artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: book-cover
           path: ./download
