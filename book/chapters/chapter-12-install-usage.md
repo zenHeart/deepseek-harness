@@ -1,6 +1,6 @@
 # 12. 安装与使用实战
 
-前五章看完了 dsh 的内部机理，本章回到地面：从零把它跑起来、配好、用顺，并把那些文档里散落各处的坑一次性填平。提醒一句贯穿全章的前提：dsh 处于 Developer Preview（v0.1），官方明示**会有兼容性破坏变更**——本文所有命令与字段以 `0.1.0-rc.7` 为准，升级后第一件事是看 changelog。
+前五章看完了 dsh 的内部机理，本章回到地面：从零把它跑起来、配好、用顺，并把那些文档里散落各处的坑一次性填平。提醒一句贯穿全章的前提：dsh 处于 Developer Preview（v0.1），官方明示**会有兼容性破坏变更**——本文所有命令与字段以 `0.1.1-rc.2` 为准，升级后第一件事是看 changelog。
 
 ## 12.1 环境准备
 
@@ -26,7 +26,7 @@ npx @deepseek-ai/dsh web   # 拉取官方 npm 包并以 web profile 启动
 
 ```sh
 npx @deepseek-ai/dsh@latest web   # 强制拉最新版
-npx @deepseek-ai/dsh@0.1.0-rc.7 web  # 钉到某个 rc 复现行为
+npx @deepseek-ai/dsh@0.1.1-rc.2 web  # 钉到某个 rc 复现行为
 ```
 
 另外提醒：官方分发渠道**只有** npm 的 `@deepseek-ai/dsh` 与 GitHub 仓库。PyPI 上存在同名的 `deepseek-harness` / `deepseek-harness-cli`（第三方协议探针工具），与官方项目毫无关系——12.8 节的坑清单还会再强调一次。
@@ -129,7 +129,7 @@ dsh --profile web --dump-config   # 打印实际生效的插件树
 dsh --dump-default-config          # 打印默认模板
 ```
 
-输出约 70 行插件配置，**每行注释标明来源文件**（base bundle？profile 层？全局 patch？）。"这行配置到底从哪来的"这个调试中最常问的问题，被这一条命令终结。配合第 7 章的 patch 语义记住一句：**树里任何一行都可被用户 patch 整行替换**。
+输出 78 行插件配置，**每行注释标明来源文件**（base bundle？profile 层？全局 patch？）。"这行配置到底从哪来的"这个调试中最常问的问题，被这一条命令终结。配合第 7 章的 patch 语义记住一句：**树里任何一行都可被用户 patch 整行替换**。
 
 ### 12.5.4 关机语义
 
@@ -162,6 +162,8 @@ $DSH_HOME/
 2. `$DSH_HOME/.credentials.yaml`（Web UI 写入处）
 3. 调用目录的 `.env`
 4. `$DSH_HOME/.env`
+
+0.1.1-rc 起 `.credentials.yaml` 带版本号并分两段：上面这条链解析的环境变量名映射在 **`refs:`** 下；OAuth 等授权获得的记录（`CredentialKey`，机制见 11.7 节）在 **`records:`** 下。旧版扁平布局会在启动时**就地自动升级**，无需手工迁移；识别不了的形状按名拒绝并在报错中给出迁移指引。
 
 源码开发时最简单的做法：
 
@@ -250,7 +252,7 @@ fi
 - Web UI 四步：配模型（立即生效、密钥只写）→ 选工作区（不选不能发消息）→ 跑任务 → 审批交互（一律 `allowed-once`）。
 - 源码运行 `pnpm install && pnpm run build && pnpm dsh web`；**tsx 不检查产物新旧**，改了代码必须重新 build；代理环境设 `NODE_USE_ENV_PROXY=1`。
 - CLI 是 profile 启动器：`--profile`、headless 一次性模式（退出码 0/1）、`dsh plugin` 转发 pnpm、`--dump-config` 看组合后插件树；flag 从第一个不认识的 token 起透传给 app；不支持 `0.0.0.0`。
-- 配置三件套：`settings.yaml`（热重载）、`.credentials.yaml`（密钥只写）、`profiles/<name>/`；凭据解析顺序：环境变量 → `.credentials.yaml` → 调用目录 `.env` → `$DSH_HOME/.env`。
+- 配置三件套：`settings.yaml`（热重载）、`.credentials.yaml`（密钥只写，已版本化分 `refs:`/`records:` 两段，旧布局启动自动升级）、`profiles/<name>/`；凭据解析顺序：环境变量 → `.credentials.yaml` → 调用目录 `.env` → `$DSH_HOME/.env`。
 - headless + `read-only` 预设 + 退出码语义，是 CI 集成的基础姿势；记住常见坑清单，尤其是 PyPI 同名混淆项目与 allowBuilds 拦截。
 
 ## 12.10 本章参考资料

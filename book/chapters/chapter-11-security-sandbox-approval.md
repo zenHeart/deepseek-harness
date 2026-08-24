@@ -58,7 +58,7 @@ type ApprovalOutcome =
 
 dsh 的本地沙箱按平台选后端，且每个后端都遵循"先探测能力，探测不到就当没有"的 fail-closed 策略：
 
-- **Linux**：bwrap（bubblewrap）或 Landlock。Landlock 路径用的是**自研的 `native/landlock-run` 原生启动器**（Rust/原生代码），以三平台 npm 包家族的形式按平台 optional dependency 分发——装在哪台机器上只拉哪台的二进制。旧 Landlock ABI 上 enforcement 降级为 `partial` 并如实上报。
+- **Linux**：bwrap（bubblewrap）或 Landlock。Landlock 路径用的是**自研的 `native/landlock-run` 原生启动器**（Rust/原生代码），以三平台 npm 包家族的形式按平台 optional dependency 分发——装在哪台机器上只拉哪台的二进制。旧 Landlock ABI 上 enforcement 降级为 `partial` 并如实上报。0.1.1-rc 起 bwrap 后端一律 `--unshare-pid` 并为私有命名空间挂载 `/proc`：此前 bwrap 挂着全新 `/proc` 却共享宿主 PID 命名空间，被限制的命令可以沿 `/proc/<pid>/root`、`/proc/<pid>/fd` 这类 procfs magic link 走进宿主进程的挂载视图，逃出 profile 的只读宿主根绑定与 `workspace-write` 白名单——宿主的 ptrace 限制只是部署相关的纵深防御，不是隔离边界。功能探测使用与真实包裹相同的 profile 构造器，建不了 PID 命名空间的主机会在选择阶段就拒绝 bwrap、沿 fail-closed 阶梯落到 Landlock。注意这是 bwrap 后端的不变量，而非 `SandboxMode` 的新承诺：Landlock 与 Seatbelt 的进程可见性不变，且没有任何后端限制网络。
 - **macOS**：Seatbelt（沙箱内核机制，`sandbox-exec` 同源）。
 - **Windows**：ACL + restricted token（`sandbox-windows-acl` 包），enforcement 同样按 `partial` 语义上报。
 
@@ -135,18 +135,33 @@ ctx.emit('fs/observed', target, { kind: 'present', version: outcome.version }, e
 
 这个对照的意义在于：fail-closed、enforcement 如实上报、MCP 与 web_fetch 默认关闭，并不是 dsh 孤立的偏执，而是整个 agent harness 行业在同一威胁模型下收敛出的共同答案——权限规则要可组合到参数级、凭证要在沙箱内隔离、Windows 这类覆盖不全的平台要当作泄露面来逐个封堵。各家真正的差别只在默认值的选择：dsh 把最保守的一档做成了开箱默认。
 
-## 11.7 本章小结
+## 11.7 凭据面：从环境变量名到授权流
+
+沙箱与审批守护的是"操作"，还有一类更安静的资产需要自己的平面：**凭据**。0.1.1-rc 系列之前，dsh 的凭据面只能表达一种秘密——环境变量名背后的值（`CredentialRef`，经"环境变量 → `.credentials.yaml` → `.env`"分层解析，见 12.6.2 节）。这恰好覆盖一个 API key，也仅止于此：OAuth 这类凭据不是"部署方被告知要存的值"，而是**与人对话获得的 token 文档**——打开页面、批准账号、粘贴回执码——还带有会在用户背后轮换的 refresh 半。pi-ai 直接建模了它（`Credential = ApiKeyCredential | OAuthCredential`、应用持有的 `CredentialStore`、`Models.login()`），而 harness 没有地方放——只有 OAuth 一种鉴权方式的 `openai-codex` 一度只能被模型目录暂扣，因为页面广告的是一种并不存在的"留空 key 即可"姿态。
+
+rc 后期的重构把这个面补齐为三个 seam，各管一个问题：
+
+1. **`dsh-credentials` 长出第二键空间。** `CredentialRef` 回答"这个环境变量名背后是什么"；`CredentialKey` 回答"这个插件为这个 id 持有什么凭据"。记录是二值联合：`{ kind: 'api-key', key?, env? }`（结构性，seam 能描述）或 `{ kind: 'grant', payload }`（刻意不透明——拥有 token 格式的库继续拥有它，唯一约束是 payload 能 JSON 往返，写入与读出双向强制）。键形为 `<scope>/<id>`，scope 是**持有方插件的注册名**而非 provider 名：用户认识 `openai-codex`，但"哪个适配器家族为记录里的字节负责"正是裸 provider 名会丢掉的信息——两个服务同名 provider 的插件会互读 payload，已卸载插件留下的记录也无法与活跃记录区分。记录不分层：授权 grant 没有环境变量可读，记录的存在就是全部事实。
+2. **`dsh-authorization` 拥有对话，永不拥有协议。** 知道如何获取自己凭据的插件，把授权流注册在它要写入的 `CredentialKey` 下；seam 对每个键单飞（single-flight）、以中性词汇路由通知与提示、然后结算；第二个授权协议到来时是"另一个流"，而不是"另一个 seam"。两个承重决定：**流拥有写入**——`run()` 解决即意味着记录已通过 `ctx.credentials` 提交（seam 确认的是它在尝试期间观察到的提交，仅存在不足以防止把陈旧记录冒充新鲜），这让 `Models.login()` 保持唯一写入者，而不是把凭据拷出来再写一次；**交互随请求而行，不进注册表**——发起授权的人才能与持有人对话，提示精确到达发起它的页面，headless 调用方提供一个"拒绝"的交互，不存在环境应答者缺失或多标签歧义。
+3. **`llm-pi-ai` 持有全部三处翻译**：pi-ai 的 `CredentialStore` 映射到记录、provider 的环境发现改问凭据 seam（再落回启动环境）、`AuthEvent`/`AuthPrompt` 重述为中性词汇并运行 `Models.login()`。每次集合重建都带着前两者构建——登录态因此能跨越配置变更存活，`openai-codex` 重回目录。
+
+存储侧随之升级：`.credentials.yaml` 有了版本号与 `refs:` / `records:` 两段；启动时会把可识别的 pre-release 扁平布局**就地升级**（全字符串扁平映射原样嵌到 `refs:` 下，持写入锁进行）——早期内部构建经 Models 页存入的 key 必须无手工编辑地存活、模型请求不中断；识别不了的扁平形状保持按名拒绝并在报错中说明手工迁移路径。两个记录在案的限制：授权尝试不持久（登录中途刷新页面即放弃该次尝试）；登出是 `deleteRecord`——本地遗忘，不通知签发方，需要服务端撤销的 provider 无处可声明。
+
+把这一节与 11.1 对照，会发现同一条语法：凭据面同样 **fail-closed**——读回答"没存"（一个无凭据服务的组合确实不持有凭据），写按名拒绝（一个 grant 蒸发掉的登录会谎报成功、然后每个请求都失败）；提示被拒绝是一个**结果**而非故障（交互以 `AuthorizationDeclinedError` 拒绝，尝试结算为 `cancelled`）；无法渲染的通知记日志丢失，而不是让授权流崩溃。
+
+## 11.8 本章小结
 
 - dsh 的安全是**双层结构**：审批层（`ctx.approval`，一次性询问）管"要不要问人"，沙箱层（`ctx.sandbox`，OS 级强制）管"能碰到什么"；总原则 fail-closed——任何环节故障/缺失一律拒绝。
 - `ApprovalOutcome` 封闭四值（`allowed-once`/`rejected`/`cancelled`/`unavailable`），`unavailable` 等于拒绝；会话策略 `ask`/`never` 中 `never` 在服务内部强制，插件无法绕过；每次询问落 `approval/asked`+`approval/decided` 审计对。
 - 沙箱三档 `SandboxMode`；每次调用携带完整 `SandboxExecutionPolicy`（mode + canonicalized root + sessionId），支持并发会话不同边界与一次性提权重试；`SandboxEnforcement` 的 `full`/`partial` 必须区分，旧 Landlock ABI 与 Windows ACL 为 `partial`。
-- 平台后端：Linux bwrap/Landlock（自研 `native/landlock-run`）、macOS Seatbelt、Windows ACL restricted-token，全部功能探测 fail-closed。
+- 平台后端：Linux bwrap/Landlock（自研 `native/landlock-run`；bwrap 已启用私有 PID 命名空间封堵 procfs 逃逸）、macOS Seatbelt、Windows ACL restricted-token，全部功能探测 fail-closed。
 - guard 单调（deny 或弃权，永不批准）；`fs/write-intent`/`fs/edit-intent` 事件门实现 read-before-write。
+- 凭据面三 seam：`dsh-credentials` 的 `CredentialKey` 记录（`<scope>/<id>`，api-key/grant 联合）、`dsh-authorization` 授权流（流拥有写入、交互随请求而行）、`llm-pi-ai` 的三处翻译；`.credentials.yaml` 版本化并在启动时就地升级旧布局。
 - `DSH_PERMISSION_MODE` 设进程级预设（默认 `workspace-write`），Web UI 权限设置只影响新会话；MCP 与 `web_fetch` 默认关闭，前者因为 MCP server 是沙箱外的可信代码，后者出于 SSRF 考量。
 
 至此，架构篇五章全部完成：从总览坐标系到会话循环、工具管线、模型与上下文、安全双层，dsh 的内部机理已经摊开。下一篇进入实战：先把 dsh 装起来用起来，再写插件，最后从零复刻一个迷你 Harness。
 
-## 11.8 本章参考资料
+## 11.9 本章参考资料
 
 - [docs/subsystems/approval.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/approval.md) — dsh 审批子系统的设计文档：ApprovalOutcome 封闭四值的完整定义、会话策略 `ask`/`never` 的语义，以及 `approval/asked`+`approval/decided` 事件对的日志格式。
 - [docs/subsystems/sandbox.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/subsystems/sandbox.md) — 沙箱子系统设计文档：三档 SandboxMode、SandboxExecutionPolicy 的字段含义，以及 `full`/`partial` enforcement 的上报契约。

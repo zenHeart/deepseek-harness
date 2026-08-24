@@ -74,6 +74,7 @@ packages:
 | `boot/`、`bundle/` | 启动胶水与 profile 分层 bundle；`apps/cli` 提供 `dsh` bin |
 | `e2b/`、`lsp/`、`mcp/`、`hooks/`、`acp/`、`sdk/` | E2B 沙箱 POC、语言服务器、MCP、Claude Code/Codex hook 桥、ACP 自动化协议、TS/Python SDK |
 | `typert/` | 自研的类型图生成/RPC 反射系统（"Typert"） |
+| `experimental/` | 私有孵化包（不进入发布 tarball）：当前承载 Agent Teams（`agent-team` + `tool-agent-team`）；稳定包被机械禁止依赖它，转正需评审公共契约 |
 
 每个包的 `package.json` description 本身就是职责说明，例如 `@deepseek-ai/dsh-agent-loop` 是 *"The concrete agent loop plugin for the DeepSeek Harness"*，`@deepseek-ai/dsh-session` 是 *"Event-sourced session store"*，`@deepseek-ai/dsh-tools` 是 *"Tool registry and execution pipeline"*。构建上采用 TypeScript project references 双聚合（host/client 分离，以避免 Cordis `Context` 声明合并冲突）+ tsdown 打包，测试用 vitest 分 unit/e2e/snapshot/web/perf/stress 六套配置。
 
@@ -111,7 +112,7 @@ dsh --profile web --dump-config   # 打印实际启动树
 
 ### 7.5.1 dsh-base bundle：约 70 行的默认人格
 
-`packages/bundle/base/cordis.patch.yml` 是每个 profile 的第一层，约 **70 个插件行**，定义了 dsh 的“默认人格”。按职能分组：
+`packages/bundle/base/cordis.patch.yml` 是每个 profile 的第一层，**78 个插件行**，定义了 dsh 的“默认人格”。按职能分组：
 
 - **框架**：`cordis-plugin-timer`、`cordis-plugin-hmr`
 - **核心脊柱**：`dsh-llm`、`dsh-session`、`dsh-typert-*`、`dsh-agent`、`dsh-agent-loop`、`dsh-tools`、`dsh-system-prompt`、`dsh-agent-default-model`（默认 `deepseek-official / deepseek-v4-flash`）
@@ -154,7 +155,9 @@ Cordis loader 的配置支持 `!!js` 表达式插值（见 `cordis-primer.md`“
 
 图 7-2 总结了这套层叠结构：base bundle 提供最底层默认人格，web-app / headless 等 bundle 决定形态，profile patch 与 home patch 承载用户偏好，`--patch` 提供一次性覆盖。由于 patch 是“按 id 整行替换”，组合结果永远是一棵确定性的、可 `--dump-config` 检查的插件树。
 
-本书以 `0.1.0-rc.5` 为分析基线，而 dsh 迭代极快。到 `rc.7`（2026-08-17），有几处演进值得留意：Web UI 的 agent 预设里原「Code mode」更名为 **PTC 模式**（程序化工具调用，底层仍是 Code Mode SDK 与 `run_code` 传输，机制详见 9.4 节）；插件可以向设置页注册自己的设置卡片；`subagent-codex` 与 `subagent-claude-code` 提供器让 Codex、Claude Code 能以子代理身份接入 Job Panel；MCP 与 ACP 通道收到的图片改为经 `dsh-attachment` 持久化为内容寻址附件，不再内联进消息；DeepSeek 官方模型目录新增了 `low` 推理档。这些变化的共同方向与本书主题一致：一切仍是插件，只是插件能触及的面更宽了。
+本书以 `0.1.0-rc.5` 为分析基线，而 dsh 迭代极快。到 `rc.7`（2026-08-17），有几处演进值得留意：Web UI 的 agent 预设里原「Code mode」更名为 **PTC 模式**（程序化工具调用，底层仍是 Code Mode SDK 与 `run_code` 传输，机制详见 9.4 节）；插件可以向设置页注册自己的设置卡片；`subagent-codex` 与 `subagent-claude-code` 提供器让 Codex、Claude Code 能以子代理身份接入 Job Panel；MCP 与 ACP 通道收到的图片改为经 `dsh-attachment` 持久化为内容寻址附件，不再内联进消息；DeepSeek 官方模型目录新增了 `low` 推理档。
+
+从 `rc.7` 到 `0.1.1-rc.2`（2026-08-21）只有四天，演进密度却丝毫不减，其中五处直接改写了本书相关章节的论述：**凭据面重构**——`dsh-credentials` 长出第二键空间 `CredentialKey` 记录，新的 `dsh-authorization` seam 承载 OAuth 授权流，`openai-codex` 等 OAuth-only provider 重回模型目录（11.7 节）；**会话日志版本机制**——`SESSION_FORMAT_VERSION` 单调整数 + 逐事件 `ignorable` 标记，旧运行时读新日志方向感知地拒绝而非误读（8.1 节）；**取消流的前缀固化**——被中断的流会把已送达内容落为 `interrupted: true` 的 `assistant/message`，取消后的追问与 fork 不再丢失用户已读到的文本（8.3.2 节）；**bwrap 私有 PID 命名空间**——封堵 procfs magic link 逃逸路径（11.3 节）；**模型层两项韧性增强**——reasoning 逐回传与 DeepSeek Files 传输的内联回退（10.2 节）。此外还有跨会话引用（8.4 节）与 `experimental/` 组内 Agent Teams 的孵化（表 7-1）。这些变化的共同方向与本书主题一致：一切仍是插件，只是插件能触及的面更宽了。
 
 ## 7.6 本章小结
 
@@ -169,7 +172,7 @@ Cordis loader 的配置支持 `!!js` 表达式插值（见 `cordis-primer.md`“
 
 ## 7.7 本章参考资料
 
-- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — dsh 官方 monorepo 源码。想亲手验证本章任何论断——包分组、bundle 配置、vendored Cordis——都从这里 clone 开始（本书以 v0.1.0-rc.5 为基线，仓库已迭代至 rc.7）。
+- [DeepSeek Harness 仓库](https://github.com/deepseek-ai/deepseek-harness) — dsh 官方 monorepo 源码。想亲手验证本章任何论断——包分组、bundle 配置、vendored Cordis——都从这里 clone 开始（本书以 v0.1.0-rc.5 为基线，仓库已迭代至 v0.1.1-rc.2）。
 - [dsh GitHub Releases](https://github.com/deepseek-ai/deepseek-harness/releases) — 官方发版页。rc.7 的 PTC 模式更名、设置卡片注册、Codex/Claude Code 子代理接入等演进都有逐版本发版说明，是追踪两个 rc 之间差异的第一站。
 - [崔添翼（tianyi）MIT 发布原推](https://x.com/tianyi/status/2087888089759015218) — dsh 作者宣布项目以 MIT 协议开源的原帖，了解项目发布背景与初衷的一手材料。
 - [docs/architecture.md](https://github.com/zenHeart/deepseek-harness/blob/master/docs/architecture.md) — 官方架构文档。Profile / Bundle / Patch 三层组合的权威说明，读完 7.5 节想动手组合自己的 profile 时，先读这份文档。

@@ -39,6 +39,8 @@ dsh 把流式 chunk 逐条落日志、UI 与日志都靠增量事件自行组装
 
 **第四，传输与翻译分层。** SSE 流解析独立在 `sse.ts`，消息格式翻译独立在 `translate.ts`。适配器还支持 `streamIdleTimeoutMs`（默认 5 分钟，流空闲超时）和 provider 自有的 `retryPolicy`——注意这与通用的 `dsh-llm-retry` 插件是两层：provider 层重试处理传输级抖动，`llm-retry` 处理请求级失败。
 
+rc 后期这个适配器又补了两处韧性设计，都是"按请求解析"哲学的延伸。**其一，reasoning 逐轮回传（rc.8）。** `serializeAssistant` 现在为每一个携带 reasoning 的助手轮次回传 `reasoning_content`，不再仅限于同时带 tool-call 的轮次。官方端点只在 tool-call 轮次要求该字段、其余位置忽略它——但 `baseURL` 可以指向任何 OpenAI 兼容网关，有的网关靠**哈希回放的思维链**来重建上游 thinking 签名；纯回答轮次不回传，网关的签名查找落空，重建出的对话便与记录发散（agent 大多数轮次都调工具，所以这个缺口看起来是间歇性的）。回放文本与 provider 流式送达逐字节一致——`translate.ts` 把一次响应的整个 reasoning 通道累积为单块，拼接哈希与原始送达的哈希相同。代价是每个无工具调用的推理轮次在后续请求中多花它的思维链 input token；被拒绝的替代方案更值得记：一个 Config 开关（拨错就静默不可重建，两端都没有可归因的报错——错位置静默失败的旋钮比 token 更贵）、按 `baseURL` 猜测（部署形态从主机名读不出来）。**其二，DeepSeek Files 的内联回退（0.1.1-rc.2）。** 视觉路由默认走 Files：图片先上传为 file id，重复请求不重发字节（file 模式高水位 128MiB）。但 Files 端点不可用、不支持或停滞时，聊天不该死在请求开始前——每次 file 解析有独立的 `filesApiTimeoutMs` 截止（默认 1 分钟，与 5 分钟流空闲超时解耦，正常为回退留出时间），失败即丢弃本次组装的临时 file 部件，用已备好的确定性 `RequestImageAttachment` 把完整图片请求重建为 base64 内联——不做额外解码、缩放或编码，保证发出的像素与失败的那次尝试一致，且一次请求绝不混用 file id 与内联图片。内联有独立高水位 `maxInlineRequestImageBytes`（默认 20MiB——base64 会膨胀，得给 JSON、文本历史与工具留空间），越过后按 10MiB 量子从最老图片前缀开始卸载。下一个请求照常重试 Files：不记进程级熔断状态，服务恢复无需等待计时器。
+
 ```yaml
 # $DSH_HOME/settings.yaml 中的 llm-deepseek 段（Web UI Models 页写入的也是这里）
 llm-deepseek:
@@ -51,7 +53,7 @@ llm-deepseek:
 
 ## 10.3 llm-pi-ai：多 provider 与自定义网关
 
-如果说 `llm-deepseek` 是"一个厂商做到透"，`llm-pi-ai` 就是"多 provider 一网打尽"。它在 base bundle 中默认休眠，由 settings 文件热加载 provider profile 唤醒。Web UI 的 "Add provider" 可以选择 Anthropic、OpenAI 等目录内置 provider；但注意原生鉴权的例外——Bedrock 要 AWS 凭据加 region，Vertex 要 ADC project，Azure 要 api-version，Codex 走 OAuth——这些不是填一个 key 能搞定的。
+如果说 `llm-deepseek` 是"一个厂商做到透"，`llm-pi-ai` 就是"多 provider 一网打尽"。它在 base bundle 中默认休眠，由 settings 文件热加载 provider profile 唤醒。Web UI 的 "Add provider" 可以选择 Anthropic、OpenAI 等目录内置 provider；但注意原生鉴权的例外——Bedrock 要 AWS 凭据加 region，Vertex 要 ADC project，Azure 要 api-version，Codex 走 OAuth——这些不是填一个 key 能搞定的。OAuth 这条路在 0.1.1-rc 系列被真正打通：`dsh-authorization` seam 让 provider 插件注册自己的授权流（PKCE 登录等），授权所得以 `CredentialKey` 记录持久化在凭据面（机制详见 11.7 节），曾因"无法鉴权"被目录暂扣的 `openai-codex` 随之回归。需要注意的是，驱动登录的界面入口（Models 页的登录按钮与浏览器侧的提示渲染）在本书基线版本尚未落地——授权流目前只能在进程内触达，部署上仍以填写 key 为主。
 
 对于公司网关或自托管模型，走自定义 provider。一份完整的 `settings.yaml` 配置长这样：
 
@@ -120,7 +122,7 @@ catalog provider 还可以用 `modelOverrides` 按模型 id 收窄能力声明�
 ## 10.5 本章小结
 
 - `ctx.llm` 是适配器 seam：`registerAdapter` 注册 provider 路由，`prepareCall` 把请求配置绑定到具体适配器并解析 exact-model 默认值（contextWindow 等），产出的 `preparedCall` 持有本次调用的连接快照。
-- `llm-deepseek` 的四个"按请求"决定：连接事实按请求解析（settings.yaml 热覆盖，下一请求生效，进行中流保留快照）、凭据按请求解析（缺 key 报 `MISSING_CREDENTIAL` 而非加载失败）、默认目录 `deepseek-v4-flash`/`deepseek-v4-pro`（1M contextWindow / 256K maxTokens / reasoningEffort high）、SSE 解析（`sse.ts`）与消息翻译（`translate.ts`）分层。
+- `llm-deepseek` 的四个"按请求"决定：连接事实按请求解析（settings.yaml 热覆盖，下一请求生效，进行中流保留快照）、凭据按请求解析（缺 key 报 `MISSING_CREDENTIAL` 而非加载失败）、默认目录 `deepseek-v4-flash`/`deepseek-v4-pro`（1M contextWindow / 256K maxTokens / reasoningEffort high）、SSE 解析（`sse.ts`）与消息翻译（`translate.ts`）分层；rc 后期又补两处传输韧性——reasoning 逐轮回传（网关可哈希重建思维链）与 Files 失败的内联回退（独立超时与 20MiB 水位，绝不混用两种图片传输）。
 - `llm-pi-ai` 承载多 provider 与自定义网关；自定义 provider 的 Provider ID 永久不可改，**手工录入的模型默认纯文本**，视觉模型必须显式 `input: [text, image]`。
 - 上下文工程四件套：`dsh-agent-instructions`（AGENTS.md/CLAUDE.md，64KB 预算）；`compaction-basic`（三个 log-only 事件锁、`surfaceOp: replace` 投影替换、toolResultPruner 先行裁剪、tool-call/result 配对边界）；spill 外溢存储；repeat-tool-reminder。压缩不是删除日志，而是替换投影——模型历史永远是日志的函数。
 

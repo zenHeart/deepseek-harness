@@ -2,6 +2,8 @@
 
 上一章我们讨论了 Cordis 提出的"时空可组合性"：时间上，每个组件的副作用必须可被完整撤销；空间上，组件间的依赖由运行时反应式管理。本章不再停留在概念层，而是直接打开 `cordiverse/cordis` 仓库的核心源码（`packages/core/src/`，全核心仅约 1848 行 TypeScript），逐文件、逐段地看清这套机制是如何落地的。读完本章，你应该能在不看文档的情况下，推断出任意一段 Cordis 插件代码在运行时的行为。
 
+一个阅读提示：在 dsh 仓库里，这套源码以 vendored 形式生活在 `vendor/cordis/src/`（重新 scoped 为 `@deepseek-ai/cordis`）。本章引用的行数与摘录以上游快照为准；vendored 副本与上游一一对应，但带有 dsh 团队逐条留痕的本地修改（JSDoc 充实、`.ts` 显式后缀、`fiber.ts` 的重入处置加固等，完整台账见 `vendor/README.md`，动机见 7.2 节）。想对照你本地 clone 的 dsh 仓库读源码时，把本章的 `packages/core/src/` 映射到 `vendor/cordis/src/` 即可。
+
 ## 5.1 Monorepo 目录结构总览
 
 Cordis 采用 yarn workspaces + yakumo 构建的 monorepo，各包职责如下：

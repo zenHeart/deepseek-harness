@@ -1,6 +1,6 @@
 # 16. 附录
 
-> 本附录所有内容以 DeepSeek Harness v0.1.0-rc.7 与 Cordis 2026-08 master 快照为准。项目处于 Developer Preview，细节可能随版本变化。
+> 本附录所有内容以 DeepSeek Harness v0.1.1-rc.2 与 Cordis 2026-08 master 快照为准。项目处于 Developer Preview，细节可能随版本变化。
 
 ## 16.1 附录 A：Cordis API 速查
 
@@ -75,7 +75,7 @@ interface Base {
 | 文件 | 用途 |
 |---|---|
 | `$DSH_HOME/settings.yaml` | 主设置（provider、模型目录等，热重载） |
-| `$DSH_HOME/.credentials.yaml` | 密钥存储（只写，Web UI 写入） |
+| `$DSH_HOME/.credentials.yaml` | 密钥存储（只写，Web UI 写入）；带版本号，分 `refs:`（环境变量名映射）/ `records:`（OAuth 等授权记录）两段，旧扁平布局启动时自动升级 |
 | `$DSH_HOME/profiles/<name>/package.json` + `cordis.patch.yml` | profile 插件依赖与用户补丁层 |
 | `$DSH_HOME/cordis.patch.yml` | 全局补丁层（优先级高于单 profile 层） |
 
@@ -96,7 +96,7 @@ interface Base {
 
 ## 16.3 附录 C：内置插件清单速查（dsh-base bundle）
 
-`packages/bundle/base/cordis.patch.yml` 是每个 profile 的第一层，约 70 个插件行。任何一行都可被用户 patch 替换（`--dump-config` 查看）。
+`packages/bundle/base/cordis.patch.yml` 是每个 profile 的第一层，78 个插件行。任何一行都可被用户 patch 替换（`--dump-config` 查看）。
 
 | 分组 | 插件 |
 |---|---|
@@ -131,6 +131,8 @@ interface Base {
 | **投影（Projection）** | 从 append-only 日志派生模型可见消息历史的纯函数（dsh 的 `deriveMessages()`）；fork、resume、压缩、审计都是同一日志上的不同投影或投影区间改写 |
 | **epoch 机制** | Cordis 内部区分注册代际的递增计数：服务重载或上下文派生时 epoch 递增，旧代际的监听与注册随之失效，保证热重载（HMR）后没有残留副作用 |
 | **Model-visible ⟺ logged** | 不变量：凡进入模型请求的内容必须能从会话日志重建，有运行时断言 |
+| **SESSION_FORMAT_VERSION** | 会话日志格式的单调整数版本：读到更新的日志方向感知地拒绝，读到更旧的经 n→n+1 升级链内存转换；逐事件 `ignorable: true` 标记让普通词表增长免于 bump |
+| **CredentialRef / CredentialKey** | 凭据面的两个键空间：前者解析"环境变量名背后的值"（API key），后者是 `<插件 scope>/<id>` 形的记录键，承载 `api-key` / `grant`（OAuth）二值联合 |
 | **Approval（审批）** | 一次性权限询问 seam；fail-closed（`unavailable` = 拒绝）；策略 `ask` / `never` |
 | **Sandbox（沙箱）** | `read-only` / `workspace-write` / `danger-full-access` 三档；本地后端 bwrap/Landlock/Seatbelt/Windows ACL，功能探测 fail-closed |
 | **Code Mode** | 保留工具 `run_code`：模型写代码，其中子工具调用作为绑定重新进入完整受守护管线 |

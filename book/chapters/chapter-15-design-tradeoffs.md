@@ -104,6 +104,10 @@ architecture.md：“A running `dsh` is a plugin tree composed at boot from orde
 
 AGENTS.md：“**Pre-release stance: foundation over blast radius**……prefer the correct foundation over compatibility shims.” 官方 README 与发布文同步压低预期：developer preview、“THERE WILL BE COMPATIBILITY-BREAKING CHANGES”。**换来的**：v0.1 不背历史包袱，错误的设计可以在用户基数还小时修正；**放弃的**：早期采用者的升级平顺性。配套条款 “Misconfiguration fails loud……never silently skip a missing referent” 是同一哲学：宁可响亮地坏，不可安静地错。
 
+### 15.4.9 会话日志版本机制：可见的过度拒绝 vs 静默的上下文掏空
+
+rc.8 落地的日志版本纪律（机制见 8.1 节）是 15.4.8 那条哲学在"数据"上的对偶：发布前立场管"代码可以破坏式演进"，版本机制管"演进之后旧数据如何被对待"。`SESSION_FORMAT_VERSION` 是单调整数而非 major/minor——“某一步能否自动升级”是那一步的升级器是否存在的属性，不该由编号形状预先承诺；词表增长走逐事件 `ignorable` 标记，且默认 **required-on-read**：读取器遇到不认识的事件类型即拒绝解释该日志，除非事件显式声明自己可忽略。**换来的**：忘记标记的代价是一次"看得见的过度拒绝"——一个本可恢复的会话被拒，用户得到明确报错与原始日志路径；**放弃的**：跨版本resume 的宽容度。反过来若默认宽容，同一个疏忽会变成"静默恢复出一个被掏空上下文的会话"——模型历史少了塑造它的内容却无任何报警。不便可以重试，错读无法撤销，这与审批层 `unavailable = 拒绝` 是同一条不对称。配套的读写方向规则同样刻意：读到更新的日志只拒绝、指点升级，绝不"试着读读看"；读到更旧的先在内存里经升级链转换查看，只有真正继续会话时才落盘——“打开看一眼”绝不能是一次隐式迁移，否则一次浏览就变成了不可回退的写操作。
+
 ![架构权衡的天平](../images/fig-c5-tradeoff.png)
 
 *图 15-2 每个设计决策都是一次权衡*
